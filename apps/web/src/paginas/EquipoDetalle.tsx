@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { POSICIONES } from '@liga/shared';
-import { api } from '../lib/api';
+import { api, subirArchivo } from '../lib/api';
 import { useSesion } from '../lib/sesion';
 import Modal from '../componentes/Modal';
+import Escudo from '../componentes/Escudo';
 import type { Equipo, Jugador } from '../lib/tipos';
 
 const vacio = { nombre: '', numero: 1, posicion: '' as string };
@@ -16,8 +17,28 @@ export default function EquipoDetalle() {
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [form, setForm] = useState(vacio);
   const [error, setError] = useState('');
+  const [subiendo, setSubiendo] = useState(false);
 
   const cargar = () => api.get<Equipo>(`/equipos/${id}`).then(setEquipo);
+
+  const subirEscudo = async (archivo: File | undefined) => {
+    if (!archivo) return;
+    setSubiendo(true);
+    try {
+      await subirArchivo(`/equipos/${id}/escudo`, archivo);
+      cargar();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo subir');
+    } finally {
+      setSubiendo(false);
+    }
+  };
+
+  const quitarEscudo = async () => {
+    if (!confirm('¿Quitar el escudo?')) return;
+    await api.delete(`/equipos/${id}/escudo`);
+    cargar();
+  };
   useEffect(() => {
     cargar();
   }, [id]);
@@ -74,11 +95,34 @@ export default function EquipoDetalle() {
       </Link>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <div className="text-center">
+            <Escudo nombre={equipo.nombre} url={equipo.escudoUrl} tam={64} />
+            {puedeEditar && (
+              <div className="mt-1 flex flex-col items-center gap-0.5">
+                <label className="cursor-pointer text-xs text-cancha-700 hover:underline">
+                  {subiendo ? 'Subiendo…' : equipo.escudoUrl ? 'Cambiar' : 'Subir escudo'}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => subirEscudo(e.target.files?.[0])}
+                  />
+                </label>
+                {equipo.escudoUrl && (
+                  <button className="text-xs text-red-600 hover:underline" onClick={quitarEscudo}>
+                    Quitar
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         <div>
           <h1 className="text-2xl font-bold">{equipo.nombre}</h1>
           <p className="text-sm text-slate-500">
             {equipo.temporada?.nombre} · Encargado: {equipo.encargado?.nombre ?? 'sin asignar'}
           </p>
+        </div>
         </div>
         {puedeEditar && (
           <button className="btn-primario" onClick={abrirNuevo}>

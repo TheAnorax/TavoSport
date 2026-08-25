@@ -1,4 +1,5 @@
 import type { FilaTabla } from '../lib/tipos';
+import Escudo from './Escudo';
 
 const cols: { k: keyof FilaTabla; t: string; ayuda: string }[] = [
   { k: 'pj', t: 'PJ', ayuda: 'Partidos jugados' },
@@ -40,7 +41,12 @@ export default function TablaPosiciones({ filas }: { filas: FilaTabla[] }) {
                   {f.posicion}
                 </span>
               </td>
-              <td className="px-3 py-3 font-medium">{f.equipoNombre}</td>
+              <td className="px-3 py-3">
+                <span className="flex items-center gap-2 font-medium">
+                  <Escudo nombre={f.equipoNombre} url={f.escudoUrl} tam={24} />
+                  {f.equipoNombre}
+                </span>
+              </td>
               {cols.map((c) => (
                 <td
                   key={c.k}

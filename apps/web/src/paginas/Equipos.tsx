@@ -4,6 +4,7 @@ import { ESTATUS_EQUIPO } from '@liga/shared';
 import { api } from '../lib/api';
 import { useSesion } from '../lib/sesion';
 import Modal from '../componentes/Modal';
+import Escudo from '../componentes/Escudo';
 import type { Equipo, Temporada, Usuario } from '../lib/tipos';
 
 const vacio = { nombre: '', estatus: 'ACTIVO' as string, encargadoId: '' };
@@ -109,6 +110,15 @@ export default function Equipos() {
 
       {cargando ? (
         <p className="text-slate-500">Cargando…</p>
+      ) : temporadas.length === 0 ? (
+        <div className="tarjeta space-y-3 text-center">
+          <p className="text-3xl">📋</p>
+          <p className="font-semibold">Primero necesitas una temporada</p>
+          <p className="mx-auto max-w-md text-sm text-slate-500">
+            Los equipos viven dentro de una temporada. Créala en <strong>Temporadas</strong> y regresa aquí.
+          </p>
+          <Link to="/temporadas" className="btn-primario">Ir a Temporadas</Link>
+        </div>
       ) : equipos.length === 0 ? (
         <div className="tarjeta text-center text-slate-500">No hay equipos en esta temporada todavía.</div>
       ) : (
@@ -117,7 +127,10 @@ export default function Equipos() {
             <div key={eq.id} className="tarjeta flex flex-col justify-between">
               <div>
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold">{eq.nombre}</h3>
+                  <span className="flex items-center gap-2">
+                    <Escudo nombre={eq.nombre} url={eq.escudoUrl} tam={28} />
+                    <h3 className="font-semibold">{eq.nombre}</h3>
+                  </span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       eq.estatus === 'ACTIVO' ? 'bg-cancha-50 text-cancha-700' : 'bg-slate-100 text-slate-600'

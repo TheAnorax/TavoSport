@@ -90,6 +90,8 @@ sin tocar código.
 | GET | `/api/publico/:slug/temporadas/:id/posiciones` | **sin login** |
 | GET | `/api/publico/:slug/temporadas/:id/jornadas` | **sin login** |
 | GET | `/api/dashboard` | autenticado |
+| DELETE | `/api/temporadas/:id` | ADMIN — bloqueado si hay resultados |
+| POST · DELETE | `/api/equipos/:id/escudo` | ADMIN o encargado del equipo |
 
 ## Estado del plan
 
@@ -97,7 +99,7 @@ sin tocar código.
 - [x] Sesión 2 — jornadas, partidos, generador de calendario, asignación de encargados
 - [x] Sesión 3 — captura de resultados, tabla de posiciones y vista pública · **MVP demo-able**
 - [x] Sesión 4 — ventana de corrección configurable, dashboard y bitácora de capturas
-- [ ] Sesión 5 — pulido y responsive
+- [x] Sesión 5 — alta de divisiones y temporadas, escudos, estados vacíos
 - [ ] Sesión 6 — deploy
 - [ ] Sesión 7 — cierre
 
@@ -111,6 +113,16 @@ sin tocar código.
 - Un encargado solo captura resultados de partidos donde juega su equipo.
 - Toda captura registra `capturadoPor` y `capturadoEn`.
 - La tabla de posiciones se deriva de los partidos FINALIZADOS en cada consulta: no hay estado que se desincronice.
+
+## Escudos
+
+Se suben a `apps/api/subidas/` y se sirven en `/subidas/…`. Máximo 1 MB; PNG, JPG, WEBP o SVG.
+El nombre del archivo lleva el `ligaId` como prefijo y un UUID. Al reemplazar un escudo se borra el anterior.
+
+> [!warning] Antes del deploy
+> En Railway y Render el disco es efímero: **los escudos desaparecen en cada deploy**
+> salvo que se contrate un volumen persistente. Si se va a hosting gestionado sin volumen,
+> hay que mover esto a un servicio de imágenes. En un VPS con disco propio no hay problema.
 
 ## Tests
 

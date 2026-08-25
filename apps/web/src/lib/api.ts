@@ -46,6 +46,26 @@ async function peticion<T>(ruta: string, init: RequestInit = {}): Promise<T> {
   return cuerpo as T;
 }
 
+/** Subida de archivos: NO se fija Content-Type, el navegador arma el boundary. */
+export async function subirArchivo<T>(ruta: string, archivo: File, campo = 'archivo'): Promise<T> {
+  const datos = new FormData();
+  datos.append(campo, archivo);
+  const token = leerToken();
+
+  const res = await fetch(`/api${ruta}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: datos,
+  });
+
+  const cuerpo = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 401) borrarToken();
+    throw new ApiError(res.status, cuerpo.error ?? 'No se pudo subir el archivo');
+  }
+  return cuerpo as T;
+}
+
 export const api = {
   get: <T>(ruta: string) => peticion<T>(ruta),
   post: <T>(ruta: string, body: unknown) =>
