@@ -4,6 +4,8 @@ import { useSesion } from '../lib/sesion';
 const enlaces = [
   { a: '/', texto: 'Inicio', soloAdmin: false },
   { a: '/equipos', texto: 'Equipos', soloAdmin: false },
+  { a: '/jornadas', texto: 'Jornadas', soloAdmin: false },
+  { a: '/posiciones', texto: 'Posiciones', soloAdmin: false },
   { a: '/temporadas', texto: 'Temporadas', soloAdmin: true },
 ];
 

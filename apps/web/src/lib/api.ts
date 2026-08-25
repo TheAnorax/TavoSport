@@ -50,6 +50,8 @@ export const api = {
   get: <T>(ruta: string) => peticion<T>(ruta),
   post: <T>(ruta: string, body: unknown) =>
     peticion<T>(ruta, { method: 'POST', body: JSON.stringify(body) }),
+  put: <T>(ruta: string, body: unknown) =>
+    peticion<T>(ruta, { method: 'PUT', body: JSON.stringify(body) }),
   patch: <T>(ruta: string, body: unknown) =>
     peticion<T>(ruta, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: <T>(ruta: string) => peticion<T>(ruta, { method: 'DELETE' }),

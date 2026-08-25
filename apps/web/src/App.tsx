@@ -7,6 +7,10 @@ import Inicio from './paginas/Inicio';
 import Equipos from './paginas/Equipos';
 import EquipoDetalle from './paginas/EquipoDetalle';
 import Temporadas from './paginas/Temporadas';
+import Jornadas from './paginas/Jornadas';
+import JornadaDetalle from './paginas/JornadaDetalle';
+import Posiciones from './paginas/Posiciones';
+import Publico from './paginas/Publico';
 
 export default function App() {
   return (
@@ -14,6 +18,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          {/* Vista abierta: fuera del layout y sin RutaProtegida, a propósito. */}
+          <Route path="/publico/:slug" element={<Publico />} />
           <Route
             element={
               <RutaProtegida>
@@ -24,6 +30,9 @@ export default function App() {
             <Route path="/" element={<Inicio />} />
             <Route path="/equipos" element={<Equipos />} />
             <Route path="/equipos/:id" element={<EquipoDetalle />} />
+            <Route path="/jornadas" element={<Jornadas />} />
+            <Route path="/jornadas/:id" element={<JornadaDetalle />} />
+            <Route path="/posiciones" element={<Posiciones />} />
             <Route
               path="/temporadas"
               element={

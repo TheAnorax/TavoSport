@@ -7,6 +7,9 @@ import authPlugin from './plugins/auth.js';
 import { rutasAuth } from './routes/auth.js';
 import { rutasCatalogo } from './routes/catalogo.js';
 import { rutasEquipos } from './routes/equipos.js';
+import { rutasCalendario } from './routes/calendario.js';
+import { rutasResultados } from './routes/resultados.js';
+import { rutasPublicas } from './routes/publico.js';
 
 const esDev = process.env.NODE_ENV !== 'production';
 
@@ -23,15 +26,20 @@ await app.register(authPlugin);
 
 // Errores de validación Zod -> 400 con detalle por campo
 app.setErrorHandler((error, _req, reply) => {
+  // Se extraen ANTES del narrowing: tras `instanceof ZodError`, TS reduce
+  // el tipo del else a `never` y pierde statusCode/message.
+  const { statusCode, message } = error as { statusCode?: number; message: string };
+
   if (error instanceof ZodError) {
     return reply.code(400).send({
       error: 'Datos inválidos',
       campos: error.flatten().fieldErrors,
     });
   }
-  app.log.error(error);
-  const code = error.statusCode ?? 500;
-  return reply.code(code).send({ error: code === 500 ? 'Error interno' : error.message });
+
+  app.log.error(error as Error);
+  const code = statusCode ?? 500;
+  return reply.code(code).send({ error: code === 500 ? 'Error interno' : message });
 });
 
 app.get('/salud', async () => ({ ok: true, hora: new Date().toISOString() }));
@@ -39,6 +47,9 @@ app.get('/salud', async () => ({ ok: true, hora: new Date().toISOString() }));
 await app.register(rutasAuth, { prefix: '/api/auth' });
 await app.register(rutasCatalogo, { prefix: '/api' });
 await app.register(rutasEquipos, { prefix: '/api' });
+await app.register(rutasCalendario, { prefix: '/api' });
+await app.register(rutasResultados, { prefix: '/api' });
+await app.register(rutasPublicas, { prefix: '/api/publico' });
 
 const cerrar = async () => {
   await app.close();

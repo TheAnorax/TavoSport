@@ -1,4 +1,4 @@
-import type { Rol, EstatusEquipo, EstatusJugador, Posicion } from '@liga/shared';
+import type { Rol, EstatusEquipo, EstatusJugador, Posicion, EstadoPartido } from '@liga/shared';
 
 export interface Usuario {
   id: string;
@@ -53,4 +53,44 @@ export interface Jugador {
   posicion: Posicion | null;
   estatus: EstatusJugador;
   equipoId: string;
+}
+
+export interface Jornada {
+  id: string;
+  numero: number;
+  fecha: string;
+  temporadaId: string;
+  _count?: { partidos: number };
+  partidos?: Partido[];
+  temporada?: { id: string; nombre: string };
+}
+
+export interface Partido {
+  id: string;
+  jornadaId: string;
+  localId: string;
+  visitanteId: string;
+  cancha: string | null;
+  fechaHora: string;
+  estado: EstadoPartido;
+  golesLocal: number | null;
+  golesVisitante: number | null;
+  local: { id: string; nombre: string; escudoUrl: string | null };
+  visitante: { id: string; nombre: string; escudoUrl: string | null };
+  jornada?: { id: string; numero: number; fecha: string };
+}
+
+export interface FilaTabla {
+  posicion: number;
+  equipoId: string;
+  equipoNombre: string;
+  escudoUrl: string | null;
+  pj: number;
+  pg: number;
+  pe: number;
+  pp: number;
+  gf: number;
+  gc: number;
+  dif: number;
+  pts: number;
 }

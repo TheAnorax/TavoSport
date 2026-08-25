@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@11.4.0",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "pnpm --parallel --filter \"./apps/*\" dev",
     "dev:api": "pnpm --filter @liga/api dev",
@@ -13,7 +15,8 @@
     "db:migrate": "pnpm --filter @liga/api prisma:migrate",
     "db:seed": "pnpm --filter @liga/api prisma:seed",
     "db:studio": "pnpm --filter @liga/api prisma:studio",
-    "db:reset": "pnpm --filter @liga/api prisma:reset"
+    "db:reset": "pnpm --filter @liga/api prisma:reset",
+    "test": "pnpm -r test"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

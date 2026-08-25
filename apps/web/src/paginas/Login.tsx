@@ -5,7 +5,7 @@ import { useSesion } from '../lib/sesion';
 export default function Login() {
   const { entrar, usuario, cargando } = useSesion();
   const navegar = useNavigate();
-  const [form, setForm] = useState({ email: 'admin@liga.mx', password: 'Password123', ligaSlug: 'santul' });
+  const [form, setForm] = useState({ email: 'admin@liga.mx', password: 'Password123', ligaSlug: 'demo' });
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
 
@@ -42,7 +42,7 @@ export default function Login() {
               className="input"
               value={form.ligaSlug}
               onChange={(e) => setForm({ ...form, ligaSlug: e.target.value })}
-              placeholder="santul"
+              placeholder="demo"
             />
           </div>
           <div>

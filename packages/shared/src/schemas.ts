@@ -125,6 +125,35 @@ export const crearPartidoSchema = z
     path: ['visitanteId'],
   });
 
+export const actualizarPartidoSchema = z.object({
+  cancha: z.string().trim().max(60).optional().nullable(),
+  fechaHora: z.coerce.date().optional(),
+  estado: z.enum(ESTADO_PARTIDO).optional(),
+  localId: id.optional(),
+  visitanteId: id.optional(),
+});
+
+/** Genera jornadas + partidos automáticamente (round-robin) para una temporada. */
+export const generarCalendarioSchema = z.object({
+  temporadaId: id,
+  fechaPrimeraJornada: z.coerce.date(),
+  /** Días entre jornada y jornada (7 = semanal). */
+  diasEntreJornadas: z.number().int().min(1).max(30).default(7),
+  /** Hora de inicio del primer partido de cada jornada (0-23). */
+  horaInicio: z.number().int().min(0).max(23).default(10),
+  /** Horas entre un partido y el siguiente dentro de la jornada. */
+  horasEntrePartidos: z.number().int().min(1).max(6).default(2),
+  canchas: z.array(z.string().trim().min(1).max(60)).min(1).default(['Cancha 1']),
+  /** Ida y vuelta: duplica las jornadas invirtiendo local/visitante. */
+  idaYVuelta: z.boolean().default(false),
+  /** Borra jornadas y partidos existentes de la temporada antes de generar. */
+  reemplazar: z.boolean().default(false),
+});
+
+export const asignarEncargadoSchema = z.object({
+  encargadoId: id.nullable(),
+});
+
 export const capturarResultadoSchema = z.object({
   golesLocal: z.number().int().min(0).max(99),
   golesVisitante: z.number().int().min(0).max(99),
@@ -158,5 +187,7 @@ export type CrearEquipo = z.infer<typeof crearEquipoSchema>;
 export type CrearJugador = z.infer<typeof crearJugadorSchema>;
 export type CrearJornada = z.infer<typeof crearJornadaSchema>;
 export type CrearPartido = z.infer<typeof crearPartidoSchema>;
+export type ActualizarPartido = z.infer<typeof actualizarPartidoSchema>;
+export type GenerarCalendario = z.infer<typeof generarCalendarioSchema>;
 export type CapturarResultado = z.infer<typeof capturarResultadoSchema>;
 export type FilaPosicion = z.infer<typeof filaPosicionSchema>;

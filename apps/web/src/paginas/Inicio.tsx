@@ -37,6 +37,20 @@ export default function Inicio() {
         ))}
       </div>
 
+      {liga && (
+        <div className="tarjeta flex flex-wrap items-center justify-between gap-3 bg-cancha-50 ring-cancha-100">
+          <div>
+            <p className="font-semibold text-cancha-900">Vista pública</p>
+            <p className="text-sm text-cancha-800">
+              Enlace abierto para jugadores y aficionados: posiciones y resultados sin cuenta.
+            </p>
+          </div>
+          <a href={`/publico/${liga.slug}`} target="_blank" rel="noreferrer" className="btn-primario">
+            Abrir /publico/{liga.slug}
+          </a>
+        </div>
+      )}
+
       <div className="tarjeta">
         <h2 className="mb-3 font-semibold">Temporadas</h2>
         {temporadas.length === 0 ? (

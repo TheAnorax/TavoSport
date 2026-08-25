@@ -55,7 +55,7 @@ async function main() {
 
   console.log('🏆 Creando liga (tenant)...');
   const liga = await prisma.liga.create({
-    data: { nombre: 'Liga Municipal Santul', slug: 'santul', config: {} },
+    data: { nombre: 'Liga Demo', slug: 'demo', config: {} },
   });
 
   console.log('👤 Creando usuarios...');
@@ -101,7 +101,7 @@ async function main() {
   });
 
   console.log('⚽ Creando equipos y jugadores...');
-  const nombresEquipos = ['Deportivo Santul','Águilas FC','Real Progreso','Atlético Centro','Halcones Unidos','Club Libertad'];
+  const nombresEquipos = ['Deportivo Norte','Águilas FC','Real Progreso','Atlético Centro','Halcones Unidos','Club Libertad'];
   const equipos = [];
   for (const [i, nombre] of nombresEquipos.entries()) {
     const equipo = await prisma.equipo.create({
@@ -172,7 +172,7 @@ async function main() {
   };
 
   console.log('\n✅ Seed completo:', totales);
-  console.log('\n🔑 Credenciales de prueba (liga slug: "santul"):');
+  console.log('\n🔑 Credenciales de prueba (liga slug: "demo"):');
   console.log('   ADMIN      admin@liga.mx        / Password123');
   console.log('   ENCARGADO  encargado1@liga.mx   / Password123\n');
 }
