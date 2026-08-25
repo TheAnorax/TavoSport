@@ -1,0 +1,12 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# pnpm 11 bloquea los postinstall de dependencias por defecto (supply-chain).
+# Estos SI los necesitamos: Prisma baja sus engines y esbuild su binario nativo.
+# Nota: en pnpm 11 esto es `allowBuilds` (un mapa). `onlyBuiltDependencies` ya no existe.
+allowBuilds:
+  prisma: true
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true

@@ -1,0 +1,21 @@
+{
+  "name": "liga-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.4.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:api": "pnpm --filter @liga/api dev",
+    "dev:web": "pnpm --filter @liga/web dev",
+    "build": "pnpm -r build",
+    "db:generate": "pnpm --filter @liga/api prisma:generate",
+    "db:migrate": "pnpm --filter @liga/api prisma:migrate",
+    "db:seed": "pnpm --filter @liga/api prisma:seed",
+    "db:studio": "pnpm --filter @liga/api prisma:studio",
+    "db:reset": "pnpm --filter @liga/api prisma:reset"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

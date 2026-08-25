@@ -1,0 +1,234 @@
+// ============================================================
+//  Plataforma Liga de Futbol — Schema v1
+//  Multi-tenant: TODA tabla operativa lleva ligaId.
+//  La tabla de posiciones NO existe: se calcula desde Partido.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/* ---------------- Enums ---------------- */
+
+enum Rol {
+  ADMIN
+  ENCARGADO
+  PUBLICO
+}
+
+enum EstatusEquipo {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
+}
+
+enum EstatusJugador {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
+  BAJA
+}
+
+enum EstadoPartido {
+  PROGRAMADO
+  EN_CURSO
+  FINALIZADO
+  SUSPENDIDO
+  CANCELADO
+}
+
+enum Posicion {
+  PORTERO
+  DEFENSA
+  MEDIO
+  DELANTERO
+}
+
+/* ---------------- Tenant raíz ---------------- */
+
+model Liga {
+  id        String   @id @default(cuid())
+  nombre    String
+  slug      String   @unique
+  logoUrl   String?
+  config    Json     @default("{}")
+  creadaEn  DateTime @default(now())
+  actualizadaEn DateTime @updatedAt
+
+  usuarios   Usuario[]
+  divisiones Division[]
+  temporadas Temporada[]
+  equipos    Equipo[]
+  jugadores  Jugador[]
+  jornadas   Jornada[]
+  partidos   Partido[]
+
+  @@map("liga")
+}
+
+/* ---------------- Usuarios ---------------- */
+
+model Usuario {
+  id           String   @id @default(cuid())
+  ligaId       String
+  email        String
+  passwordHash String
+  nombre       String
+  rol          Rol      @default(ENCARGADO)
+  activo       Boolean  @default(true)
+  creadoEn     DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  liga             Liga      @relation(fields: [ligaId], references: [id], onDelete: Cascade)
+  equiposACargo    Equipo[]  @relation("EncargadoDeEquipo")
+  resultadosCapturados Partido[] @relation("CapturadoPor")
+
+  @@unique([ligaId, email])
+  @@index([ligaId])
+  @@map("usuario")
+}
+
+/* ---------------- Estructura de competencia ---------------- */
+
+model Division {
+  id       String @id @default(cuid())
+  ligaId   String
+  nombre   String
+  orden    Int    @default(0)
+  creadaEn DateTime @default(now())
+
+  liga       Liga        @relation(fields: [ligaId], references: [id], onDelete: Cascade)
+  temporadas Temporada[]
+
+  @@unique([ligaId, nombre])
+  @@index([ligaId])
+  @@map("division")
+}
+
+model Temporada {
+  id                String   @id @default(cuid())
+  ligaId            String
+  divisionId        String
+  nombre            String
+  fechaInicio       DateTime
+  fechaFin          DateTime
+  activa            Boolean  @default(true)
+  reglasPuntuacion  Json     @default("{}")
+  creadaEn          DateTime @default(now())
+  actualizadaEn     DateTime @updatedAt
+
+  liga     Liga     @relation(fields: [ligaId], references: [id], onDelete: Cascade)
+  division Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  equipos  Equipo[]
+  jornadas Jornada[]
+
+  @@unique([divisionId, nombre])
+  @@index([ligaId])
+  @@index([divisionId])
+  @@map("temporada")
+}
+
+model Equipo {
+  id          String        @id @default(cuid())
+  ligaId      String
+  temporadaId String
+  nombre      String
+  escudoUrl   String?
+  estatus     EstatusEquipo @default(ACTIVO)
+  encargadoId String?
+  creadoEn    DateTime      @default(now())
+  actualizadoEn DateTime    @updatedAt
+
+  liga      Liga      @relation(fields: [ligaId], references: [id], onDelete: Cascade)
+  temporada Temporada @relation(fields: [temporadaId], references: [id], onDelete: Cascade)
+  encargado Usuario?  @relation("EncargadoDeEquipo", fields: [encargadoId], references: [id], onDelete: SetNull)
+  jugadores Jugador[]
+
+  partidosLocal     Partido[] @relation("EquipoLocal")
+  partidosVisitante Partido[] @relation("EquipoVisitante")
+
+  @@unique([temporadaId, nombre])
+  @@index([ligaId])
+  @@index([temporadaId])
+  @@index([encargadoId])
+  @@map("equipo")
+}
+
+model Jugador {
+  id       String         @id @default(cuid())
+  ligaId   String
+  equipoId String
+  nombre   String
+  numero   Int
+  posicion Posicion?
+  estatus  EstatusJugador @default(ACTIVO)
+  creadoEn DateTime       @default(now())
+  actualizadoEn DateTime  @updatedAt
+
+  liga   Liga   @relation(fields: [ligaId], references: [id], onDelete: Cascade)
+  equipo Equipo @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+
+  // Regla de negocio: no se repite el dorsal dentro del mismo equipo
+  @@unique([equipoId, numero])
+  @@index([ligaId])
+  @@index([equipoId])
+  @@map("jugador")
+}
+
+/* ---------------- Calendario y resultados ---------------- */
+
+model Jornada {
+  id          String   @id @default(cuid())
+  ligaId      String
+  temporadaId String
+  numero      Int
+  fecha       DateTime
+  creadaEn    DateTime @default(now())
+
+  liga      Liga      @relation(fields: [ligaId], references: [id], onDelete: Cascade)
+  temporada Temporada @relation(fields: [temporadaId], references: [id], onDelete: Cascade)
+  partidos  Partido[]
+
+  @@unique([temporadaId, numero])
+  @@index([ligaId])
+  @@index([temporadaId])
+  @@map("jornada")
+}
+
+model Partido {
+  id          String        @id @default(cuid())
+  ligaId      String
+  jornadaId   String
+  localId     String
+  visitanteId String
+  cancha      String?
+  fechaHora   DateTime
+  estado      EstadoPartido @default(PROGRAMADO)
+
+  golesLocal     Int?
+  golesVisitante Int?
+
+  // Auditoría de captura de resultado
+  capturadoPorId String?
+  capturadoEn    DateTime?
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  liga          Liga     @relation(fields: [ligaId], references: [id], onDelete: Cascade)
+  jornada       Jornada  @relation(fields: [jornadaId], references: [id], onDelete: Cascade)
+  local         Equipo   @relation("EquipoLocal", fields: [localId], references: [id], onDelete: Cascade)
+  visitante     Equipo   @relation("EquipoVisitante", fields: [visitanteId], references: [id], onDelete: Cascade)
+  capturadoPor  Usuario? @relation("CapturadoPor", fields: [capturadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([ligaId])
+  @@index([jornadaId])
+  @@index([localId])
+  @@index([visitanteId])
+  @@map("partido")
+}
