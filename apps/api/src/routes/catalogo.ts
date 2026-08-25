@@ -18,8 +18,14 @@ export const rutasCatalogo: FastifyPluginAsync = async (app) => {
   );
 
   app.patch('/liga', { preHandler: app.exigirRol('ADMIN') }, async (req) => {
-    const datos = actualizarLigaSchema.parse(req.body);
-    return prisma.liga.update({ where: { id: req.user.ligaId }, data: datos });
+    const { config, ...resto } = actualizarLigaSchema.parse(req.body);
+    return prisma.liga.update({
+      where: { id: req.user.ligaId },
+      data: {
+        ...resto,
+        ...(config ? { config: config as unknown as Prisma.InputJsonValue } : {}),
+      },
+    });
   });
 
   /* ---------- Divisiones ---------- */
@@ -122,6 +128,29 @@ export const rutasCatalogo: FastifyPluginAsync = async (app) => {
       });
       if (r.count === 0) return reply.code(404).send({ error: 'Temporada no encontrada' });
       return prisma.temporada.findUnique({ where: { id: req.params.id } });
+    },
+  );
+
+  app.delete<{ Params: { id: string } }>(
+    '/temporadas/:id',
+    { preHandler: app.exigirRol('ADMIN') },
+    async (req, reply) => {
+      const temporada = await prisma.temporada.findFirst({
+        where: { id: req.params.id, ligaId: req.user.ligaId },
+      });
+      if (!temporada) return reply.code(404).send({ error: 'Temporada no encontrada' });
+
+      const jugados = await prisma.partido.count({
+        where: { jornada: { temporadaId: temporada.id }, estado: 'FINALIZADO' },
+      });
+      if (jugados > 0) {
+        return reply.code(409).send({
+          error: `No se puede borrar: la temporada tiene ${jugados} partido(s) con resultado. Márcala como inactiva.`,
+        });
+      }
+
+      await prisma.temporada.delete({ where: { id: temporada.id } });
+      return reply.code(204).send();
     },
   );
 };

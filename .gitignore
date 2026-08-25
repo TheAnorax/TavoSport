@@ -9,3 +9,4 @@ build/
 .idea/
 apps/api/prisma/*.db
 coverage/
+apps/api/subidas/

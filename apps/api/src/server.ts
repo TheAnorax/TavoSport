@@ -1,5 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
+import estaticos from '@fastify/static';
 import { ZodError } from 'zod';
 import { env } from './env.js';
 import { prisma } from './prisma.js';
@@ -10,6 +12,8 @@ import { rutasEquipos } from './routes/equipos.js';
 import { rutasCalendario } from './routes/calendario.js';
 import { rutasResultados } from './routes/resultados.js';
 import { rutasPublicas } from './routes/publico.js';
+import { rutasDashboard } from './routes/dashboard.js';
+import { rutasEscudos, DIR_SUBIDAS } from './routes/escudos.js';
 
 const esDev = process.env.NODE_ENV !== 'production';
 
@@ -22,6 +26,7 @@ await app.register(cors, {
   origin: env.CORS_ORIGIN.split(',').map((o) => o.trim()),
   credentials: true,
 });
+await app.register(multipart, { limits: { fileSize: 1_000_000, files: 1 } });
 await app.register(authPlugin);
 
 // Errores de validación Zod -> 400 con detalle por campo
@@ -42,6 +47,9 @@ app.setErrorHandler((error, _req, reply) => {
   return reply.code(code).send({ error: code === 500 ? 'Error interno' : message });
 });
 
+// Los escudos se sirven como archivos estáticos desde el disco del servidor.
+await app.register(estaticos, { root: DIR_SUBIDAS, prefix: '/subidas/' });
+
 app.get('/salud', async () => ({ ok: true, hora: new Date().toISOString() }));
 
 await app.register(rutasAuth, { prefix: '/api/auth' });
@@ -49,6 +57,8 @@ await app.register(rutasCatalogo, { prefix: '/api' });
 await app.register(rutasEquipos, { prefix: '/api' });
 await app.register(rutasCalendario, { prefix: '/api' });
 await app.register(rutasResultados, { prefix: '/api' });
+await app.register(rutasDashboard, { prefix: '/api' });
+await app.register(rutasEscudos, { prefix: '/api' });
 await app.register(rutasPublicas, { prefix: '/api/publico' });
 
 const cerrar = async () => {

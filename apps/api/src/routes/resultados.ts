@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { capturarResultadoSchema } from '@liga/shared';
+import { capturarResultadoSchema, leerConfigLiga, ventanaAbierta } from '@liga/shared';
 import { prisma } from '../prisma.js';
 import { tablaDeTemporada } from '../lib/tabla.js';
 
@@ -21,13 +21,34 @@ export const rutasResultados: FastifyPluginAsync = async (app) => {
         return reply.code(409).send({ error: 'No se puede capturar un partido cancelado' });
       }
 
-      // Un ENCARGADO solo captura partidos donde juega su equipo.
       if (req.user.rol !== 'ADMIN') {
+        const liga = await prisma.liga.findUnique({
+          where: { id: req.user.ligaId },
+          select: { config: true },
+        });
+        const config = leerConfigLiga(liga?.config);
+
+        if (!config.permitirCapturaEncargado) {
+          return reply.code(403).send({ error: 'En esta liga solo el administrador captura resultados' });
+        }
+
+        // Solo partidos donde juega su equipo.
         const suyo =
           partido.local.encargadoId === req.user.sub ||
           partido.visitante.encargadoId === req.user.sub;
         if (!suyo) {
           return reply.code(403).send({ error: 'Solo puedes capturar partidos de tu equipo' });
+        }
+
+        // Corregir un marcador ya capturado tiene fecha de caducidad.
+        const esCorreccion = partido.estado === 'FINALIZADO';
+        if (esCorreccion && !ventanaAbierta(partido.fechaHora, config.horasParaCorregir)) {
+          return reply.code(403).send({
+            error:
+              config.horasParaCorregir === 0
+                ? 'Solo el administrador puede corregir un resultado ya capturado'
+                : `El plazo para corregir venció (${config.horasParaCorregir} h después del partido). Pide el cambio al administrador.`,
+          });
         }
       }
 

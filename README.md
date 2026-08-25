@@ -50,6 +50,19 @@ packages/
 `Liga` es la raíz del tenant y **toda** tabla operativa lleva `ligaId`.
 El JWT carga `ligaId`; cada query del API filtra por él. Una instalación sirve a N ligas.
 
+## Configuración por liga
+
+`Liga.config` (JSON, validado por `configLigaSchema`) — editable desde **Configuración** en la UI:
+
+| Ajuste | Default | Qué hace |
+|---|---|---|
+| `permitirCapturaEncargado` | `true` | Si es `false`, solo el ADMIN captura resultados |
+| `horasParaCorregir` | `48` | Plazo del encargado para corregir un marcador. `0` = solo el ADMIN corrige |
+| `contacto` | — | Contacto del organizador |
+
+El plazo se cuenta **desde la hora del partido**, no desde la captura: así no se
+reinicia cada vez que alguien edita. El ADMIN nunca tiene límite.
+
 ## Reglas de puntuación
 
 Viven en `Temporada.reglasPuntuacion` (JSON), validadas por `reglasPuntuacionSchema`.
@@ -76,13 +89,14 @@ sin tocar código.
 | GET | `/api/publico/:slug` | **sin login** |
 | GET | `/api/publico/:slug/temporadas/:id/posiciones` | **sin login** |
 | GET | `/api/publico/:slug/temporadas/:id/jornadas` | **sin login** |
+| GET | `/api/dashboard` | autenticado |
 
 ## Estado del plan
 
 - [x] Sesión 1 — monorepo, schema, auth, CRUD equipos/jugadores
 - [x] Sesión 2 — jornadas, partidos, generador de calendario, asignación de encargados
 - [x] Sesión 3 — captura de resultados, tabla de posiciones y vista pública · **MVP demo-able**
-- [ ] Sesión 4 — permisos finos y validaciones de negocio
+- [x] Sesión 4 — ventana de corrección configurable, dashboard y bitácora de capturas
 - [ ] Sesión 5 — pulido y responsive
 - [ ] Sesión 6 — deploy
 - [ ] Sesión 7 — cierre
@@ -101,7 +115,7 @@ sin tocar código.
 ## Tests
 
 ```bash
-pnpm test    # 18 tests: motor de posiciones + generador de calendario
+pnpm test    # 25 tests: posiciones, round-robin y config de liga
 ```
 
 Cubren puntuación configurable, los cinco criterios de desempate, invariantes

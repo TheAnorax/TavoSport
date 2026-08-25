@@ -11,6 +11,7 @@ import Jornadas from './paginas/Jornadas';
 import JornadaDetalle from './paginas/JornadaDetalle';
 import Posiciones from './paginas/Posiciones';
 import Publico from './paginas/Publico';
+import Configuracion from './paginas/Configuracion';
 
 export default function App() {
   return (
@@ -33,6 +34,14 @@ export default function App() {
             <Route path="/jornadas" element={<Jornadas />} />
             <Route path="/jornadas/:id" element={<JornadaDetalle />} />
             <Route path="/posiciones" element={<Posiciones />} />
+            <Route
+              path="/configuracion"
+              element={
+                <RutaProtegida roles={['ADMIN']}>
+                  <Configuracion />
+                </RutaProtegida>
+              }
+            />
             <Route
               path="/temporadas"
               element={

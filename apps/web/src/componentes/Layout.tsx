@@ -7,6 +7,7 @@ const enlaces = [
   { a: '/jornadas', texto: 'Jornadas', soloAdmin: false },
   { a: '/posiciones', texto: 'Posiciones', soloAdmin: false },
   { a: '/temporadas', texto: 'Temporadas', soloAdmin: true },
+  { a: '/configuracion', texto: 'Configuración', soloAdmin: true },
 ];
 
 export default function Layout() {

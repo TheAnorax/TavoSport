@@ -7,6 +7,7 @@ import {
   POSICIONES,
 } from './enums.js';
 import { reglasPuntuacionSchema } from './reglas.js';
+import { configLigaSchema } from './configLiga.js';
 
 /* ---------- helpers ---------- */
 const id = z.string().cuid();
@@ -50,7 +51,10 @@ export const crearLigaSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones'),
   logoUrl: z.string().url().optional().nullable(),
 });
-export const actualizarLigaSchema = crearLigaSchema.partial().omit({ slug: true });
+export const actualizarLigaSchema = crearLigaSchema
+  .partial()
+  .omit({ slug: true })
+  .extend({ config: configLigaSchema.optional() });
 
 /* ---------- Division ---------- */
 export const crearDivisionSchema = z.object({
