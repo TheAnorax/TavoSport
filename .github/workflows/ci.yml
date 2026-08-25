@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+
+    # Postgres real: el typecheck del API necesita el cliente Prisma generado,
+    # y así el día que agreguemos tests de integración ya hay base contra qué correr.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: liga
+          POSTGRES_PASSWORD: liga
+          POSTGRES_DB: liga_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://liga:liga@localhost:5432/liga_test?schema=public
+      JWT_SECRET: secreto-solo-para-ci-no-usar-en-produccion
+      CORS_ORIGIN: http://localhost:5173
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Generar cliente Prisma
+        run: pnpm db:generate
+
+      - name: Aplicar migraciones
+        run: pnpm --filter @liga/api exec prisma migrate deploy
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

@@ -11,6 +11,17 @@ bash arranque.sh
 
 Eso crea `liga_dev`, instala dependencias, genera el cliente Prisma, aplica la migración inicial y siembra datos de prueba.
 
+## Build de producción
+
+```bash
+pnpm build
+```
+
+- **API**: `tsup` empaqueta `apps/api/dist/server.js` con `@liga/shared` **dentro del bundle**.
+  Compilarlo con `tsc` a secas no sirve: el JS resultante seguiría importando TypeScript
+  en runtime y el servidor no arrancaría. Prisma queda fuera del bundle porque trae binarios nativos.
+- **Web**: `vite build` genera estáticos en `apps/web/dist/`.
+
 ## Día a día
 
 ```bash
@@ -113,6 +124,11 @@ sin tocar código.
 - Un encargado solo captura resultados de partidos donde juega su equipo.
 - Toda captura registra `capturadoPor` y `capturadoEn`.
 - La tabla de posiciones se deriva de los partidos FINALIZADOS en cada consulta: no hay estado que se desincronice.
+
+## Integración continua
+
+`.github/workflows/ci.yml` levanta Postgres 16, genera el cliente Prisma, aplica migraciones
+y corre typecheck, tests y build en cada push a `main` y en cada PR.
 
 ## Escudos
 
