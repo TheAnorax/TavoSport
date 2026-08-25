@@ -3,6 +3,14 @@
 Monorepo TypeScript multi-tenant para administrar ligas de fútbol.
 Stack: **React + Vite + Tailwind** · **Fastify + Prisma + PostgreSQL** · tipos y validaciones compartidos con **Zod**.
 
+## Documentación
+
+| Documento                                                 | Para quién                                         |
+| --------------------------------------------------------- | -------------------------------------------------- |
+| [Manual de usuario](docs/manual-usuario.md)               | Quien administra la liga. Sin tecnicismos.         |
+| [Guía para desarrolladores](docs/para-desarrolladores.md) | Arranque, arquitectura y flujo de trabajo.         |
+| Este archivo                                              | Referencia técnica: API, configuración, seguridad. |
+
 ## Arranque (una sola vez)
 
 ```bash
