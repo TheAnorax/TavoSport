@@ -106,7 +106,8 @@ export const rutasCatalogo: FastifyPluginAsync = async (app) => {
         fechaInicio: datos.fechaInicio,
         fechaFin: datos.fechaFin,
         activa: datos.activa,
-        reglasPuntuacion: (datos.reglasPuntuacion ?? REGLAS_DEFAULT) as unknown as Prisma.InputJsonValue,
+        reglasPuntuacion: (datos.reglasPuntuacion ??
+          REGLAS_DEFAULT) as unknown as Prisma.InputJsonValue,
       },
     });
     return reply.code(201).send(temporada);

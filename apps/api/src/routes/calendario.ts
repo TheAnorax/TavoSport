@@ -59,7 +59,9 @@ export const rutasCalendario: FastifyPluginAsync = async (app) => {
       where: { temporadaId: datos.temporadaId, numero: datos.numero },
     });
     if (repetida) {
-      return reply.code(409).send({ error: `La jornada ${datos.numero} ya existe en esta temporada` });
+      return reply
+        .code(409)
+        .send({ error: `La jornada ${datos.numero} ya existe en esta temporada` });
     }
 
     const jornada = await prisma.jornada.create({
@@ -145,7 +147,9 @@ export const rutasCalendario: FastifyPluginAsync = async (app) => {
       },
     });
     if (equipos.length !== 2) {
-      return reply.code(400).send({ error: 'Ambos equipos deben pertenecer a la temporada de la jornada' });
+      return reply
+        .code(400)
+        .send({ error: 'Ambos equipos deben pertenecer a la temporada de la jornada' });
     }
 
     // Un equipo no juega dos veces en la misma jornada.
@@ -205,7 +209,9 @@ export const rutasCalendario: FastifyPluginAsync = async (app) => {
       });
       if (!partido) return reply.code(404).send({ error: 'Partido no encontrado' });
       if (partido.estado === 'FINALIZADO') {
-        return reply.code(409).send({ error: 'No se puede borrar un partido con resultado capturado' });
+        return reply
+          .code(409)
+          .send({ error: 'No se puede borrar un partido con resultado capturado' });
       }
       await prisma.partido.delete({ where: { id: partido.id } });
       return reply.code(204).send();

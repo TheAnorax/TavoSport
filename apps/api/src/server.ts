@@ -2,6 +2,8 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import estaticos from '@fastify/static';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import { ZodError } from 'zod';
 import { env } from './env.js';
 import { prisma } from './prisma.js';
@@ -26,6 +28,22 @@ await app.register(cors, {
   origin: env.CORS_ORIGIN.split(',').map((o) => o.trim()),
   credentials: true,
 });
+// Cabeceras de seguridad. crossOriginResourcePolicy se relaja para que el front
+// (otro puerto en desarrollo) pueda mostrar los escudos servidos por el API.
+await app.register(helmet, {
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+});
+
+// Freno global; el login lleva uno mucho más estricto en su propia ruta.
+await app.register(rateLimit, {
+  max: 300,
+  timeWindow: '1 minute',
+  errorResponseBuilder: (_req, contexto) => ({
+    error: `Demasiadas peticiones. Intenta de nuevo en ${contexto.after}.`,
+  }),
+});
+
 await app.register(multipart, { limits: { fileSize: 1_000_000, files: 1 } });
 await app.register(authPlugin);
 
@@ -48,7 +66,21 @@ app.setErrorHandler((error, _req, reply) => {
 });
 
 // Los escudos se sirven como archivos estáticos desde el disco del servidor.
-await app.register(estaticos, { root: DIR_SUBIDAS, prefix: '/subidas/' });
+await app.register(estaticos, {
+  root: DIR_SUBIDAS,
+  prefix: '/subidas/',
+  // Los archivos subidos NUNCA se ejecutan en el navegador: se fuerza a que se
+  // traten como datos opacos. Sin esto, un SVG malicioso abierto directamente
+  // podría correr JavaScript en el mismo origen que la API (XSS almacenado).
+  setHeaders: (res) => {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+    );
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  },
+});
 
 app.get('/salud', async () => ({ ok: true, hora: new Date().toISOString() }));
 

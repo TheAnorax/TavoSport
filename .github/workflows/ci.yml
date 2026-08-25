@@ -51,6 +51,9 @@ jobs:
       - name: Aplicar migraciones
         run: pnpm --filter @liga/api exec prisma migrate deploy
 
+      - name: Formato
+        run: pnpm format:check
+
       - name: Typecheck
         run: pnpm -r typecheck
 

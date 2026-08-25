@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import Modal from '../componentes/Modal';
+import { IconoEditar, IconoBorrar, IconoMas, IconoBalon } from '../componentes/Iconos';
 import type { Division, Temporada } from '../lib/tipos';
 
 const hoy = () => new Date().toISOString().slice(0, 10);
@@ -69,7 +70,10 @@ export default function Temporadas() {
   };
 
   const borrarDiv = async (d: Division) => {
-    if (!confirm(`¿Eliminar la división "${d.nombre}"? Se borran sus temporadas, equipos y partidos.`)) return;
+    if (
+      !confirm(`¿Eliminar la división "${d.nombre}"? Se borran sus temporadas, equipos y partidos.`)
+    )
+      return;
     try {
       await api.delete(`/divisiones/${d.id}`);
       cargar();
@@ -132,7 +136,9 @@ export default function Temporadas() {
           <h1 className="text-2xl font-bold">Estructura de la liga</h1>
           <p className="text-sm text-slate-500">Divisiones y sus temporadas.</p>
         </div>
-        <button className="btn-primario" onClick={() => abrirDiv()}>+ Nueva división</button>
+        <button className="btn-primario" onClick={() => abrirDiv()}>
+          <IconoMas /> Nueva división
+        </button>
       </div>
 
       {divisiones.length === 0 ? (
@@ -140,10 +146,12 @@ export default function Temporadas() {
           <p className="text-3xl">🏆</p>
           <p className="font-semibold">Empieza por crear una división</p>
           <p className="mx-auto max-w-md text-sm text-slate-500">
-            Una división agrupa temporadas (por ejemplo <em>Primera Varonil</em> o <em>Femenil</em>).
-            Dentro de cada temporada van los equipos, las jornadas y los partidos.
+            Una división agrupa temporadas (por ejemplo <em>Primera Varonil</em> o <em>Femenil</em>
+            ). Dentro de cada temporada van los equipos, las jornadas y los partidos.
           </p>
-          <button className="btn-primario" onClick={() => abrirDiv()}>Crear la primera división</button>
+          <button className="btn-primario" onClick={() => abrirDiv()}>
+            <IconoMas /> Crear la primera división
+          </button>
         </div>
       ) : (
         divisiones.map((d) => {
@@ -151,34 +159,68 @@ export default function Temporadas() {
           return (
             <div key={d.id} className="tarjeta">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-semibold">{d.nombre}</h2>
-                <div className="flex gap-2">
-                  <button className="text-sm text-cancha-700 hover:underline" onClick={() => abrirDiv(d)}>Editar</button>
-                  <button className="text-sm text-red-600 hover:underline" onClick={() => borrarDiv(d)}>Eliminar</button>
-                  <button className="btn-secundario !py-1 !px-3 text-xs" onClick={() => abrirTemp(d.id)}>
-                    + Temporada
+                <h2 className="flex items-center gap-2 text-base font-bold">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-cancha-50 text-cancha-700">
+                    <IconoBalon size={17} />
+                  </span>
+                  {d.nombre}
+                </h2>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    className="btn-icono"
+                    title="Editar división"
+                    aria-label="Editar división"
+                    onClick={() => abrirDiv(d)}
+                  >
+                    <IconoEditar />
+                  </button>
+                  <button
+                    className="btn-icono-peligro"
+                    title="Eliminar división"
+                    aria-label="Eliminar división"
+                    onClick={() => borrarDiv(d)}
+                  >
+                    <IconoBorrar />
+                  </button>
+                  <button className="btn-secundario btn-sm" onClick={() => abrirTemp(d.id)}>
+                    <IconoMas size={14} /> Temporada
                   </button>
                 </div>
               </div>
 
               <ul className="mt-2 divide-y divide-slate-100">
                 {suyas.map((t) => (
-                  <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
-                    <span>
+                  <li
+                    key={t.id}
+                    className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm"
+                  >
+                    <span className="flex items-center gap-2 font-medium">
                       {t.nombre}
-                      {t.activa && (
-                        <span className="ml-2 rounded-full bg-cancha-50 px-2 py-0.5 text-xs text-cancha-700">activa</span>
+                      {t.activa ? (
+                        <span className="insignia-verde">activa</span>
+                      ) : (
+                        <span className="insignia-gris">cerrada</span>
                       )}
                     </span>
-                    <span className="flex items-center gap-3">
-                      <span className="text-slate-500">
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500">
                         {t._count?.equipos ?? 0} equipos · {t._count?.jornadas ?? 0} jornadas
                       </span>
-                      <button className="text-sm text-cancha-700 hover:underline" onClick={() => abrirTemp(d.id, t)}>
-                        Editar
+                      <button
+                        className="btn-icono"
+                        title="Editar temporada"
+                        aria-label="Editar temporada"
+                        onClick={() => abrirTemp(d.id, t)}
+                      >
+                        <IconoEditar />
                       </button>
-                      <button className="text-sm text-red-600 hover:underline" onClick={() => borrarTemp(t)}>
-                        ✕
+                      <button
+                        className="btn-icono-peligro"
+                        title="Eliminar temporada"
+                        aria-label="Eliminar temporada"
+                        onClick={() => borrarTemp(t)}
+                      >
+                        <IconoBorrar />
                       </button>
                     </span>
                   </li>
@@ -194,60 +236,98 @@ export default function Temporadas() {
         })
       )}
 
-      <Modal titulo={divEditando ? 'Editar división' : 'Nueva división'} abierto={modalDiv} onCerrar={() => setModalDiv(false)}>
+      <Modal
+        titulo={divEditando ? 'Editar división' : 'Nueva división'}
+        abierto={modalDiv}
+        onCerrar={() => setModalDiv(false)}
+      >
         <form onSubmit={guardarDiv} className="space-y-4">
           <div>
             <label className="etiqueta">Nombre</label>
-            <input className="input" value={formDiv.nombre} autoFocus
+            <input
+              className="input"
+              value={formDiv.nombre}
+              autoFocus
               onChange={(e) => setFormDiv({ ...formDiv, nombre: e.target.value })}
-              placeholder="Primera Varonil" />
+              placeholder="Primera Varonil"
+            />
           </div>
           <div>
             <label className="etiqueta">Orden</label>
-            <input className="input" type="number" min={0} value={formDiv.orden}
-              onChange={(e) => setFormDiv({ ...formDiv, orden: Number(e.target.value) })} />
-            <p className="mt-1 text-xs text-slate-400">Define en qué orden se listan las divisiones.</p>
+            <input
+              className="input"
+              type="number"
+              min={0}
+              value={formDiv.orden}
+              onChange={(e) => setFormDiv({ ...formDiv, orden: Number(e.target.value) })}
+            />
+            <p className="mt-1 text-xs text-slate-400">
+              Define en qué orden se listan las divisiones.
+            </p>
           </div>
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {error && <p className="aviso-error">{error}</p>}
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn-secundario" onClick={() => setModalDiv(false)}>Cancelar</button>
+            <button type="button" className="btn-secundario" onClick={() => setModalDiv(false)}>
+              Cancelar
+            </button>
             <button className="btn-primario">Guardar</button>
           </div>
         </form>
       </Modal>
 
-      <Modal titulo={tempEditando ? 'Editar temporada' : 'Nueva temporada'} abierto={modalTemp} onCerrar={() => setModalTemp(false)}>
+      <Modal
+        titulo={tempEditando ? 'Editar temporada' : 'Nueva temporada'}
+        abierto={modalTemp}
+        onCerrar={() => setModalTemp(false)}
+      >
         <form onSubmit={guardarTemp} className="space-y-4">
           <div>
             <label className="etiqueta">Nombre</label>
-            <input className="input" value={formTemp.nombre} autoFocus
+            <input
+              className="input"
+              value={formTemp.nombre}
+              autoFocus
               onChange={(e) => setFormTemp({ ...formTemp, nombre: e.target.value })}
-              placeholder="Apertura 2026" />
+              placeholder="Apertura 2026"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="etiqueta">Inicio</label>
-              <input className="input" type="date" value={formTemp.fechaInicio}
-                onChange={(e) => setFormTemp({ ...formTemp, fechaInicio: e.target.value })} />
+              <input
+                className="input"
+                type="date"
+                value={formTemp.fechaInicio}
+                onChange={(e) => setFormTemp({ ...formTemp, fechaInicio: e.target.value })}
+              />
             </div>
             <div>
               <label className="etiqueta">Fin</label>
-              <input className="input" type="date" value={formTemp.fechaFin}
-                onChange={(e) => setFormTemp({ ...formTemp, fechaFin: e.target.value })} />
+              <input
+                className="input"
+                type="date"
+                value={formTemp.fechaFin}
+                onChange={(e) => setFormTemp({ ...formTemp, fechaFin: e.target.value })}
+              />
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={formTemp.activa}
-              onChange={(e) => setFormTemp({ ...formTemp, activa: e.target.checked })} />
+            <input
+              type="checkbox"
+              checked={formTemp.activa}
+              onChange={(e) => setFormTemp({ ...formTemp, activa: e.target.checked })}
+            />
             Temporada activa (aparece en la vista pública)
           </label>
           <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
             Se crea con puntuación 3-1-0 y desempate por diferencia de goles, goles a favor y
             enfrentamiento directo. Se puede ajustar después.
           </p>
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {error && <p className="aviso-error">{error}</p>}
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn-secundario" onClick={() => setModalTemp(false)}>Cancelar</button>
+            <button type="button" className="btn-secundario" onClick={() => setModalTemp(false)}>
+              Cancelar
+            </button>
             <button className="btn-primario">Guardar</button>
           </div>
         </form>

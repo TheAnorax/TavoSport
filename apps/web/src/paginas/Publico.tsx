@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { fmtFecha, fmtHora } from '../lib/fechas';
 import TablaPosiciones from '../componentes/TablaPosiciones';
+import Escudo from '../componentes/Escudo';
+import { IconoBalon } from '../componentes/Iconos';
 import type { FilaTabla, Liga, Partido } from '../lib/tipos';
 
 interface TemporadaPublica {
@@ -44,7 +46,9 @@ export default function Publico() {
   useEffect(() => {
     if (!temporadaId) return;
     api.get<FilaTabla[]>(`/publico/${slug}/temporadas/${temporadaId}/posiciones`).then(setFilas);
-    api.get<JornadaPublica[]>(`/publico/${slug}/temporadas/${temporadaId}/jornadas`).then(setJornadas);
+    api
+      .get<JornadaPublica[]>(`/publico/${slug}/temporadas/${temporadaId}/jornadas`)
+      .then(setJornadas);
   }, [slug, temporadaId]);
 
   if (error) {
@@ -53,7 +57,9 @@ export default function Publico() {
         <div className="tarjeta max-w-sm text-center">
           <p className="text-3xl">🔍</p>
           <p className="mt-2 font-semibold">{error}</p>
-          <p className="mt-1 text-sm text-slate-500">Revisa el enlace con el organizador de tu liga.</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Revisa el enlace con el organizador de tu liga.
+          </p>
         </div>
       </div>
     );
@@ -61,19 +67,34 @@ export default function Publico() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-cancha-700 text-white">
-        <div className="mx-auto max-w-4xl px-4 py-6">
-          <p className="text-3xl">⚽</p>
-          <h1 className="mt-1 text-2xl font-bold">{liga?.nombre ?? 'Cargando…'}</h1>
+      <header className="relative overflow-hidden bg-pizarra-950 text-white">
+        <div
+          className="absolute inset-0 opacity-80"
+          style={{
+            backgroundImage:
+              'radial-gradient(70% 90% at 15% 0%, rgb(3 152 85 / .55), transparent 70%),' +
+              'radial-gradient(50% 80% at 90% 100%, rgb(163 230 53 / .18), transparent 70%)',
+          }}
+        />
+        <div className="relative mx-auto max-w-4xl px-4 py-7">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
+            <IconoBalon size={26} />
+          </span>
+          <h1 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            {liga?.nombre ?? 'Cargando…'}
+          </h1>
           {temporadas.length > 0 && (
             <select
-              className="mt-3 rounded-lg border-0 bg-white/15 px-3 py-1.5 text-sm text-white backdrop-blur
-                         focus:ring-2 focus:ring-white/50 [&>option]:text-slate-900"
+              className="mt-3 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm font-medium
+                         text-white backdrop-blur focus:outline-none focus:ring-2 focus:ring-lima-400/60
+                         [&>option]:text-slate-900"
               value={temporadaId}
               onChange={(e) => setTemporadaId(e.target.value)}
             >
               {temporadas.map((t) => (
-                <option key={t.id} value={t.id}>{t.division.nombre} — {t.nombre}</option>
+                <option key={t.id} value={t.id}>
+                  {t.division.nombre} — {t.nombre}
+                </option>
               ))}
             </select>
           )}
@@ -81,13 +102,15 @@ export default function Publico() {
       </header>
 
       <div className="mx-auto max-w-4xl px-4 py-5">
-        <div className="mb-4 flex gap-1 rounded-lg bg-slate-100 p-1">
+        <div className="mb-4 flex gap-1 rounded-2xl bg-slate-100 p-1">
           {(['tabla', 'resultados'] as const).map((p) => (
             <button
               key={p}
               onClick={() => setPestana(p)}
-              className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${
-                pestana === p ? 'bg-white text-cancha-700 shadow-sm' : 'text-slate-600'
+              className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
+                pestana === p
+                  ? 'bg-white text-cancha-700 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               {p === 'tabla' ? 'Posiciones' : 'Resultados'}
@@ -102,23 +125,31 @@ export default function Publico() {
             {jornadas.map((j) => (
               <div key={j.id} className="tarjeta">
                 <div className="mb-3 flex items-baseline justify-between">
-                  <h2 className="font-semibold">Jornada {j.numero}</h2>
+                  <h2 className="font-bold">Jornada {j.numero}</h2>
                   <span className="text-xs capitalize text-slate-500">{fmtFecha(j.fecha)}</span>
                 </div>
                 <div className="divide-y divide-slate-100">
                   {j.partidos.map((p) => (
                     <div key={p.id} className="flex items-center gap-2 py-2.5 text-sm">
-                      <span className="flex-1 text-right font-medium">{p.local.nombre}</span>
+                      <span className="flex flex-1 items-center justify-end gap-2 text-right font-semibold">
+                        <span className="truncate">{p.local.nombre}</span>
+                        <Escudo nombre={p.local.nombre} url={p.local.escudoUrl} tam={24} />
+                      </span>
                       <span
-                        className={`w-16 shrink-0 rounded-md py-1 text-center font-bold tabular-nums ${
-                          p.estado === 'FINALIZADO' ? 'bg-cancha-50 text-cancha-800' : 'bg-slate-100 text-slate-500'
+                        className={`w-[68px] shrink-0 rounded-lg py-1 text-center font-extrabold tabular ${
+                          p.estado === 'FINALIZADO'
+                            ? 'bg-cancha-600 text-white'
+                            : 'bg-slate-100 text-slate-500'
                         }`}
                       >
                         {p.estado === 'FINALIZADO'
                           ? `${p.golesLocal}-${p.golesVisitante}`
                           : fmtHora(p.fechaHora)}
                       </span>
-                      <span className="flex-1 font-medium">{p.visitante.nombre}</span>
+                      <span className="flex flex-1 items-center gap-2 font-semibold">
+                        <Escudo nombre={p.visitante.nombre} url={p.visitante.escudoUrl} tam={24} />
+                        <span className="truncate">{p.visitante.nombre}</span>
+                      </span>
                     </div>
                   ))}
                   {j.partidos.length === 0 && (
@@ -128,7 +159,9 @@ export default function Publico() {
               </div>
             ))}
             {jornadas.length === 0 && (
-              <div className="tarjeta text-center text-slate-500">Todavía no hay calendario publicado.</div>
+              <div className="tarjeta text-center text-slate-500">
+                Todavía no hay calendario publicado.
+              </div>
             )}
           </div>
         )}

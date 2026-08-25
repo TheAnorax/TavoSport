@@ -35,7 +35,14 @@ function filaVacia(equipo: EquipoBase): Omit<FilaTabla, 'posicion'> {
     equipoId: equipo.id,
     equipoNombre: equipo.nombre,
     escudoUrl: equipo.escudoUrl ?? null,
-    pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, dif: 0, pts: 0,
+    pj: 0,
+    pg: 0,
+    pe: 0,
+    pp: 0,
+    gf: 0,
+    gc: 0,
+    dif: 0,
+    pts: 0,
   };
 }
 
@@ -59,15 +66,21 @@ function enfrentamientoDirecto(
       (p.localId === aId && p.visitanteId === bId) || (p.localId === bId && p.visitanteId === aId);
     if (!esEntreEllos) continue;
 
-    const [gA, gB] = p.localId === aId
-      ? [p.golesLocal, p.golesVisitante]
-      : [p.golesVisitante, p.golesLocal];
+    const [gA, gB] =
+      p.localId === aId ? [p.golesLocal, p.golesVisitante] : [p.golesVisitante, p.golesLocal];
 
     golesA += gA;
     golesB += gB;
-    if (gA > gB) { ptsA += reglas.puntosVictoria; ptsB += reglas.puntosDerrota; }
-    else if (gA < gB) { ptsB += reglas.puntosVictoria; ptsA += reglas.puntosDerrota; }
-    else { ptsA += reglas.puntosEmpate; ptsB += reglas.puntosEmpate; }
+    if (gA > gB) {
+      ptsA += reglas.puntosVictoria;
+      ptsB += reglas.puntosDerrota;
+    } else if (gA < gB) {
+      ptsB += reglas.puntosVictoria;
+      ptsA += reglas.puntosDerrota;
+    } else {
+      ptsA += reglas.puntosEmpate;
+      ptsB += reglas.puntosEmpate;
+    }
   }
 
   if (ptsA !== ptsB) return ptsB - ptsA;
@@ -91,19 +104,28 @@ export function calcularPosiciones(
     const visitante = mapa.get(p.visitanteId);
     if (!local || !visitante) continue; // partido de un equipo que ya no está en la tabla
 
-    local.pj++; visitante.pj++;
-    local.gf += p.golesLocal; local.gc += p.golesVisitante;
-    visitante.gf += p.golesVisitante; visitante.gc += p.golesLocal;
+    local.pj++;
+    visitante.pj++;
+    local.gf += p.golesLocal;
+    local.gc += p.golesVisitante;
+    visitante.gf += p.golesVisitante;
+    visitante.gc += p.golesLocal;
 
     if (p.golesLocal > p.golesVisitante) {
-      local.pg++; local.pts += reglas.puntosVictoria;
-      visitante.pp++; visitante.pts += reglas.puntosDerrota;
+      local.pg++;
+      local.pts += reglas.puntosVictoria;
+      visitante.pp++;
+      visitante.pts += reglas.puntosDerrota;
     } else if (p.golesLocal < p.golesVisitante) {
-      visitante.pg++; visitante.pts += reglas.puntosVictoria;
-      local.pp++; local.pts += reglas.puntosDerrota;
+      visitante.pg++;
+      visitante.pts += reglas.puntosVictoria;
+      local.pp++;
+      local.pts += reglas.puntosDerrota;
     } else {
-      local.pe++; visitante.pe++;
-      local.pts += reglas.puntosEmpate; visitante.pts += reglas.puntosEmpate;
+      local.pe++;
+      visitante.pe++;
+      local.pts += reglas.puntosEmpate;
+      visitante.pts += reglas.puntosEmpate;
     }
   }
 
@@ -112,12 +134,18 @@ export function calcularPosiciones(
   type Fila = Omit<FilaTabla, 'posicion'>;
   const criterio = (c: CriterioDesempate, a: Fila, b: Fila): number => {
     switch (c) {
-      case 'DIFERENCIA_GOLES': return b.dif - a.dif;
-      case 'GOLES_FAVOR': return b.gf - a.gf;
-      case 'MENOS_GOLES_CONTRA': return a.gc - b.gc;
-      case 'PARTIDOS_GANADOS': return b.pg - a.pg;
-      case 'ENFRENTAMIENTO_DIRECTO': return enfrentamientoDirecto(a.equipoId, b.equipoId, partidos, reglas);
-      case 'SORTEO': return 0;
+      case 'DIFERENCIA_GOLES':
+        return b.dif - a.dif;
+      case 'GOLES_FAVOR':
+        return b.gf - a.gf;
+      case 'MENOS_GOLES_CONTRA':
+        return a.gc - b.gc;
+      case 'PARTIDOS_GANADOS':
+        return b.pg - a.pg;
+      case 'ENFRENTAMIENTO_DIRECTO':
+        return enfrentamientoDirecto(a.equipoId, b.equipoId, partidos, reglas);
+      case 'SORTEO':
+        return 0;
     }
   };
 

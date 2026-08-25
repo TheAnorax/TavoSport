@@ -16,9 +16,12 @@
     "db:seed": "pnpm --filter @liga/api prisma:seed",
     "db:studio": "pnpm --filter @liga/api prisma:studio",
     "db:reset": "pnpm --filter @liga/api prisma:reset",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "prettier": "^3.4.2",
     "typescript": "^5.6.3"
   }
 }

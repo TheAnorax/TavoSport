@@ -34,9 +34,9 @@ pnpm db:reset     # borra y recrea la BD + seed
 
 **Credenciales del seed** — liga `demo`:
 
-| Rol | Email | Password |
-|---|---|---|
-| ADMIN | admin@liga.mx | Password123 |
+| Rol       | Email              | Password    |
+| --------- | ------------------ | ----------- |
+| ADMIN     | admin@liga.mx      | Password123 |
 | ENCARGADO | encargado1@liga.mx | Password123 |
 
 ## Estructura
@@ -65,11 +65,11 @@ El JWT carga `ligaId`; cada query del API filtra por él. Una instalación sirve
 
 `Liga.config` (JSON, validado por `configLigaSchema`) — editable desde **Configuración** en la UI:
 
-| Ajuste | Default | Qué hace |
-|---|---|---|
-| `permitirCapturaEncargado` | `true` | Si es `false`, solo el ADMIN captura resultados |
-| `horasParaCorregir` | `48` | Plazo del encargado para corregir un marcador. `0` = solo el ADMIN corrige |
-| `contacto` | — | Contacto del organizador |
+| Ajuste                     | Default | Qué hace                                                                   |
+| -------------------------- | ------- | -------------------------------------------------------------------------- |
+| `permitirCapturaEncargado` | `true`  | Si es `false`, solo el ADMIN captura resultados                            |
+| `horasParaCorregir`        | `48`    | Plazo del encargado para corregir un marcador. `0` = solo el ADMIN corrige |
+| `contacto`                 | —       | Contacto del organizador                                                   |
 
 El plazo se cuenta **desde la hora del partido**, no desde la captura: así no se
 reinicia cada vez que alguien edita. El ADMIN nunca tiene límite.
@@ -82,27 +82,27 @@ sin tocar código.
 
 ## API (v1)
 
-| Método | Ruta | Rol |
-|---|---|---|
-| POST | `/api/auth/login` | público |
-| GET | `/api/auth/yo` | autenticado |
-| POST · GET | `/api/auth/usuarios` | ADMIN |
-| GET · PATCH | `/api/liga` | autenticado · ADMIN |
-| CRUD | `/api/divisiones` | ADMIN |
-| GET · POST · PATCH | `/api/temporadas` | autenticado · ADMIN |
-| CRUD | `/api/equipos` | ADMIN (encargado edita el suyo) |
-| CRUD | `/api/jugadores` | ADMIN o encargado del equipo |
-| CRUD | `/api/jornadas` | autenticado · ADMIN para escribir |
-| CRUD | `/api/partidos` | autenticado · ADMIN para escribir |
-| POST | `/api/calendario/generar` | ADMIN — round-robin automático |
-| PUT · DELETE | `/api/partidos/:id/resultado` | ADMIN o encargado de un equipo del partido |
-| GET | `/api/temporadas/:id/posiciones` | autenticado |
-| GET | `/api/publico/:slug` | **sin login** |
-| GET | `/api/publico/:slug/temporadas/:id/posiciones` | **sin login** |
-| GET | `/api/publico/:slug/temporadas/:id/jornadas` | **sin login** |
-| GET | `/api/dashboard` | autenticado |
-| DELETE | `/api/temporadas/:id` | ADMIN — bloqueado si hay resultados |
-| POST · DELETE | `/api/equipos/:id/escudo` | ADMIN o encargado del equipo |
+| Método             | Ruta                                           | Rol                                        |
+| ------------------ | ---------------------------------------------- | ------------------------------------------ |
+| POST               | `/api/auth/login`                              | público                                    |
+| GET                | `/api/auth/yo`                                 | autenticado                                |
+| POST · GET         | `/api/auth/usuarios`                           | ADMIN                                      |
+| GET · PATCH        | `/api/liga`                                    | autenticado · ADMIN                        |
+| CRUD               | `/api/divisiones`                              | ADMIN                                      |
+| GET · POST · PATCH | `/api/temporadas`                              | autenticado · ADMIN                        |
+| CRUD               | `/api/equipos`                                 | ADMIN (encargado edita el suyo)            |
+| CRUD               | `/api/jugadores`                               | ADMIN o encargado del equipo               |
+| CRUD               | `/api/jornadas`                                | autenticado · ADMIN para escribir          |
+| CRUD               | `/api/partidos`                                | autenticado · ADMIN para escribir          |
+| POST               | `/api/calendario/generar`                      | ADMIN — round-robin automático             |
+| PUT · DELETE       | `/api/partidos/:id/resultado`                  | ADMIN o encargado de un equipo del partido |
+| GET                | `/api/temporadas/:id/posiciones`               | autenticado                                |
+| GET                | `/api/publico/:slug`                           | **sin login**                              |
+| GET                | `/api/publico/:slug/temporadas/:id/posiciones` | **sin login**                              |
+| GET                | `/api/publico/:slug/temporadas/:id/jornadas`   | **sin login**                              |
+| GET                | `/api/dashboard`                               | autenticado                                |
+| DELETE             | `/api/temporadas/:id`                          | ADMIN — bloqueado si hay resultados        |
+| POST · DELETE      | `/api/equipos/:id/escudo`                      | ADMIN o encargado del equipo               |
 
 ## Estado del plan
 
@@ -124,6 +124,36 @@ sin tocar código.
 - Un encargado solo captura resultados de partidos donde juega su equipo.
 - Toda captura registra `capturadoPor` y `capturadoEn`.
 - La tabla de posiciones se deriva de los partidos FINALIZADOS en cada consulta: no hay estado que se desincronice.
+
+## Diseño
+
+Identidad de fútbol, no de panel administrativo genérico.
+
+- **Verde césped** (`cancha`) como color de acción, con **lima** de transmisión deportiva para destacar.
+- **Amarilla / roja** reservadas a su significado real en el juego.
+- **Superficies oscuras** (`pizarra`) en las zonas "estadio": login, cabecera pública y encabezado de la tabla.
+- **Vidrio** (`.vidrio`, translúcido + desenfoque) en navegación y diálogos.
+  Deliberadamente **no** se usa detrás de tablas de datos: ahí el contraste manda sobre el efecto.
+- Acciones con icono y `title`/`aria-label`, nunca texto de color suelto.
+- Navegación inferior en móvil, superior en escritorio.
+
+## Formato
+
+```bash
+pnpm format        # aplica Prettier
+pnpm format:check  # lo verifica (corre en CI)
+```
+
+## Seguridad
+
+- Contraseñas con bcrypt; JWT de 12 h con `ligaId` dentro y filtrado por tenant en cada query.
+- `@fastify/helmet` para cabeceras; `@fastify/rate-limit` global (300/min) y **10 intentos por 5 min en el login**.
+- Subida de escudos: solo PNG/JPG/WEBP, máximo 1 MB, con verificación de **números mágicos**
+  (el mimetype lo manda el cliente y se puede falsear). SVG está prohibido a propósito:
+  es XML ejecutable y sirve como vector de XSS almacenado.
+- Los archivos servidos desde `/subidas/` llevan CSP restrictiva, `sandbox` y `nosniff`.
+- Al asignar encargado se verifica que el usuario exista **en esa liga** y tenga el rol correcto.
+- Las rutas públicas nunca devuelven emails, roles ni datos de usuarios.
 
 ## Integración continua
 

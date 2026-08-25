@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { useSesion } from '../lib/sesion';
 import Modal from '../componentes/Modal';
 import Escudo from '../componentes/Escudo';
+import { IconoEditar, IconoBorrar, IconoMas } from '../componentes/Iconos';
 import type { Equipo, Temporada, Usuario } from '../lib/tipos';
 
 const vacio = { nombre: '', estatus: 'ACTIVO' as string, encargadoId: '' };
@@ -37,7 +38,10 @@ export default function Equipos() {
 
   const cargar = (id: string) => {
     setCargando(true);
-    api.get<Equipo[]>(`/equipos?temporadaId=${id}`).then(setEquipos).finally(() => setCargando(false));
+    api
+      .get<Equipo[]>(`/equipos?temporadaId=${id}`)
+      .then(setEquipos)
+      .finally(() => setCargando(false));
   };
 
   useEffect(() => {
@@ -96,7 +100,11 @@ export default function Equipos() {
         <div className="flex items-end gap-2">
           <div>
             <label className="etiqueta">Temporada</label>
-            <select className="input" value={temporadaId} onChange={(e) => setTemporadaId(e.target.value)}>
+            <select
+              className="input"
+              value={temporadaId}
+              onChange={(e) => setTemporadaId(e.target.value)}
+            >
               {temporadas.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.division?.nombre} — {t.nombre}
@@ -104,7 +112,11 @@ export default function Equipos() {
               ))}
             </select>
           </div>
-          {esAdmin && <button className="btn-primario" onClick={abrirNuevo}>+ Nuevo equipo</button>}
+          {esAdmin && (
+            <button className="btn-primario" onClick={abrirNuevo}>
+              <IconoMas /> Nuevo equipo
+            </button>
+          )}
         </div>
       </div>
 
@@ -115,12 +127,17 @@ export default function Equipos() {
           <p className="text-3xl">📋</p>
           <p className="font-semibold">Primero necesitas una temporada</p>
           <p className="mx-auto max-w-md text-sm text-slate-500">
-            Los equipos viven dentro de una temporada. Créala en <strong>Temporadas</strong> y regresa aquí.
+            Los equipos viven dentro de una temporada. Créala en <strong>Temporadas</strong> y
+            regresa aquí.
           </p>
-          <Link to="/temporadas" className="btn-primario">Ir a Temporadas</Link>
+          <Link to="/temporadas" className="btn-primario">
+            Ir a Temporadas
+          </Link>
         </div>
       ) : equipos.length === 0 ? (
-        <div className="tarjeta text-center text-slate-500">No hay equipos en esta temporada todavía.</div>
+        <div className="tarjeta text-center text-slate-500">
+          No hay equipos en esta temporada todavía.
+        </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {equipos.map((eq) => (
@@ -131,11 +148,7 @@ export default function Equipos() {
                     <Escudo nombre={eq.nombre} url={eq.escudoUrl} tam={28} />
                     <h3 className="font-semibold">{eq.nombre}</h3>
                   </span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      eq.estatus === 'ACTIVO' ? 'bg-cancha-50 text-cancha-700' : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
+                  <span className={eq.estatus === 'ACTIVO' ? 'insignia-verde' : 'insignia-gris'}>
                     {eq.estatus}
                   </span>
                 </div>
@@ -144,12 +157,28 @@ export default function Equipos() {
                   Encargado: {eq.encargado?.nombre ?? 'sin asignar'}
                 </p>
               </div>
-              <div className="mt-4 flex gap-2">
-                <Link to={`/equipos/${eq.id}`} className="btn-secundario flex-1">Plantilla</Link>
+              <div className="mt-4 flex items-center gap-2">
+                <Link to={`/equipos/${eq.id}`} className="btn-secundario flex-1">
+                  Ver plantilla
+                </Link>
                 {esAdmin && (
                   <>
-                    <button className="btn-secundario" onClick={() => abrirEditar(eq)}>Editar</button>
-                    <button className="btn-peligro" onClick={() => eliminar(eq)}>✕</button>
+                    <button
+                      className="btn-icono"
+                      title="Editar equipo"
+                      aria-label="Editar equipo"
+                      onClick={() => abrirEditar(eq)}
+                    >
+                      <IconoEditar />
+                    </button>
+                    <button
+                      className="btn-icono-peligro"
+                      title="Eliminar equipo"
+                      aria-label="Eliminar equipo"
+                      onClick={() => eliminar(eq)}
+                    >
+                      <IconoBorrar />
+                    </button>
                   </>
                 )}
               </div>
@@ -166,33 +195,50 @@ export default function Equipos() {
         <form onSubmit={guardar} className="space-y-4">
           <div>
             <label className="etiqueta">Nombre del equipo</label>
-            <input className="input" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} autoFocus />
+            <input
+              className="input"
+              value={form.nombre}
+              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              autoFocus
+            />
           </div>
           <div>
             <label className="etiqueta">Encargado</label>
-            <select className="input" value={form.encargadoId} onChange={(e) => setForm({ ...form, encargadoId: e.target.value })}>
+            <select
+              className="input"
+              value={form.encargadoId}
+              onChange={(e) => setForm({ ...form, encargadoId: e.target.value })}
+            >
               <option value="">Sin asignar</option>
               {encargados.map((u) => (
-                <option key={u.id} value={u.id}>{u.nombre} — {u.email}</option>
+                <option key={u.id} value={u.id}>
+                  {u.nombre} — {u.email}
+                </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-slate-400">
-              El encargado puede editar este equipo y su plantilla, nada más.
-            </p>
+            <p className="ayuda">El encargado puede editar este equipo y su plantilla, nada más.</p>
           </div>
           {editandoId && (
             <div>
               <label className="etiqueta">Estatus</label>
-              <select className="input" value={form.estatus} onChange={(e) => setForm({ ...form, estatus: e.target.value })}>
+              <select
+                className="input"
+                value={form.estatus}
+                onChange={(e) => setForm({ ...form, estatus: e.target.value })}
+              >
                 {ESTATUS_EQUIPO.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
           )}
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {error && <p className="aviso-error">{error}</p>}
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn-secundario" onClick={() => setModal(false)}>Cancelar</button>
+            <button type="button" className="btn-secundario" onClick={() => setModal(false)}>
+              Cancelar
+            </button>
             <button className="btn-primario">Guardar</button>
           </div>
         </form>

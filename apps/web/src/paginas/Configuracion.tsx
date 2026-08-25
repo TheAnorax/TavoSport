@@ -58,7 +58,8 @@ export default function Configuracion() {
             <label className="etiqueta">Identificador público</label>
             <input className="input bg-slate-50" value={liga.slug} disabled />
             <p className="mt-1 text-xs text-slate-400">
-              La vista abierta vive en /publico/{liga.slug}. No se puede cambiar: rompería los enlaces ya repartidos.
+              La vista abierta vive en /publico/{liga.slug}. No se puede cambiar: rompería los
+              enlaces ya repartidos.
             </p>
           </div>
         </div>
@@ -76,7 +77,8 @@ export default function Configuracion() {
             <span>
               <strong>Los encargados pueden capturar</strong>
               <span className="block text-xs text-slate-500">
-                Solo de los partidos donde juega su equipo. Si lo apagas, únicamente el administrador captura.
+                Solo de los partidos donde juega su equipo. Si lo apagas, únicamente el
+                administrador captura.
               </span>
             </span>
           </label>
@@ -93,8 +95,8 @@ export default function Configuracion() {
             />
             <p className="mt-1 text-xs text-slate-500">
               Se cuenta desde la hora del partido, no desde la captura — así el plazo no se reinicia
-              cada vez que alguien edita. <strong>0 = solo el administrador corrige.</strong>{' '}
-              El administrador nunca tiene límite.
+              cada vez que alguien edita. <strong>0 = solo el administrador corrige.</strong> El
+              administrador nunca tiene límite.
             </p>
           </div>
         </div>
@@ -109,7 +111,7 @@ export default function Configuracion() {
           />
         </div>
 
-        {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+        {error && <p className="aviso-error">{error}</p>}
 
         <div className="flex items-center gap-3">
           <button className="btn-primario" disabled={estado === 'guardando'}>

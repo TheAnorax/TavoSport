@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import { useSesion } from '../lib/sesion';
 import { fmtFecha } from '../lib/fechas';
 import Modal from '../componentes/Modal';
+import { IconoBorrar, IconoMas, IconoRayo, IconoCalendario } from '../componentes/Iconos';
 import type { Jornada, Temporada } from '../lib/tipos';
 
 export default function Jornadas() {
@@ -62,7 +63,10 @@ export default function Jornadas() {
         diasEntreJornadas: Number(cfg.diasEntreJornadas),
         horaInicio: Number(cfg.horaInicio),
         horasEntrePartidos: Number(cfg.horasEntrePartidos),
-        canchas: cfg.canchas.split(',').map((c) => c.trim()).filter(Boolean),
+        canchas: cfg.canchas
+          .split(',')
+          .map((c) => c.trim())
+          .filter(Boolean),
         idaYVuelta: cfg.idaYVuelta,
         reemplazar: cfg.reemplazar,
       });
@@ -112,7 +116,11 @@ export default function Jornadas() {
         <div className="flex flex-wrap items-end gap-2">
           <div>
             <label className="etiqueta">Temporada</label>
-            <select className="input" value={temporadaId} onChange={(e) => setTemporadaId(e.target.value)}>
+            <select
+              className="input"
+              value={temporadaId}
+              onChange={(e) => setTemporadaId(e.target.value)}
+            >
               {temporadas.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.division?.nombre} — {t.nombre}
@@ -122,11 +130,23 @@ export default function Jornadas() {
           </div>
           {esAdmin && (
             <>
-              <button className="btn-secundario" onClick={() => { setError(''); setModalManual(true); }}>
-                + Jornada
+              <button
+                className="btn-secundario"
+                onClick={() => {
+                  setError('');
+                  setModalManual(true);
+                }}
+              >
+                <IconoMas /> Jornada
               </button>
-              <button className="btn-primario" onClick={() => { setError(''); setModalGenerar(true); }}>
-                ⚡ Generar calendario
+              <button
+                className="btn-primario"
+                onClick={() => {
+                  setError('');
+                  setModalGenerar(true);
+                }}
+              >
+                <IconoRayo /> Generar calendario
               </button>
             </>
           )}
@@ -149,19 +169,26 @@ export default function Jornadas() {
           {jornadas.map((j) => (
             <div key={j.id} className="tarjeta flex flex-col justify-between">
               <div>
-                <div className="flex items-baseline justify-between">
-                  <h3 className="text-lg font-semibold">Jornada {j.numero}</h3>
-                  <span className="text-xs text-slate-500">{j._count?.partidos ?? 0} partidos</span>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-lg font-bold">Jornada {j.numero}</h3>
+                  <span className="insignia-gris">{j._count?.partidos ?? 0} partidos</span>
                 </div>
-                <p className="mt-1 text-sm capitalize text-slate-500">{fmtFecha(j.fecha)}</p>
+                <p className="mt-1 flex items-center gap-1.5 text-sm capitalize text-slate-500">
+                  <IconoCalendario size={14} /> {fmtFecha(j.fecha)}
+                </p>
               </div>
               <div className="mt-4 flex gap-2">
                 <Link to={`/jornadas/${j.id}`} className="btn-secundario flex-1">
                   Ver partidos
                 </Link>
                 {esAdmin && (
-                  <button className="btn-peligro" onClick={() => eliminar(j)}>
-                    ✕
+                  <button
+                    className="btn-icono-peligro"
+                    title="Eliminar jornada"
+                    aria-label="Eliminar jornada"
+                    onClick={() => eliminar(j)}
+                  >
+                    <IconoBorrar />
                   </button>
                 )}
               </div>
@@ -170,11 +197,15 @@ export default function Jornadas() {
         </div>
       )}
 
-      <Modal titulo="Generar calendario automático" abierto={modalGenerar} onCerrar={() => setModalGenerar(false)}>
+      <Modal
+        titulo="Generar calendario automático"
+        abierto={modalGenerar}
+        onCerrar={() => setModalGenerar(false)}
+      >
         <form onSubmit={generar} className="space-y-4">
           <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
-            Round-robin: cada equipo activo juega contra todos los demás una vez.
-            Con N equipos salen N−1 jornadas.
+            Round-robin: cada equipo activo juega contra todos los demás una vez. Con N equipos
+            salen N−1 jornadas.
           </p>
           <div>
             <label className="etiqueta">Fecha de la primera jornada</label>
@@ -188,38 +219,65 @@ export default function Jornadas() {
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="etiqueta">Días entre</label>
-              <input className="input" type="number" min={1} max={30} value={cfg.diasEntreJornadas}
-                onChange={(e) => setCfg({ ...cfg, diasEntreJornadas: Number(e.target.value) })} />
+              <input
+                className="input"
+                type="number"
+                min={1}
+                max={30}
+                value={cfg.diasEntreJornadas}
+                onChange={(e) => setCfg({ ...cfg, diasEntreJornadas: Number(e.target.value) })}
+              />
             </div>
             <div>
               <label className="etiqueta">Hora inicio</label>
-              <input className="input" type="number" min={0} max={23} value={cfg.horaInicio}
-                onChange={(e) => setCfg({ ...cfg, horaInicio: Number(e.target.value) })} />
+              <input
+                className="input"
+                type="number"
+                min={0}
+                max={23}
+                value={cfg.horaInicio}
+                onChange={(e) => setCfg({ ...cfg, horaInicio: Number(e.target.value) })}
+              />
             </div>
             <div>
               <label className="etiqueta">Hrs/partido</label>
-              <input className="input" type="number" min={1} max={6} value={cfg.horasEntrePartidos}
-                onChange={(e) => setCfg({ ...cfg, horasEntrePartidos: Number(e.target.value) })} />
+              <input
+                className="input"
+                type="number"
+                min={1}
+                max={6}
+                value={cfg.horasEntrePartidos}
+                onChange={(e) => setCfg({ ...cfg, horasEntrePartidos: Number(e.target.value) })}
+              />
             </div>
           </div>
           <div>
             <label className="etiqueta">Canchas (separadas por coma)</label>
-            <input className="input" value={cfg.canchas}
-              onChange={(e) => setCfg({ ...cfg, canchas: e.target.value })} />
+            <input
+              className="input"
+              value={cfg.canchas}
+              onChange={(e) => setCfg({ ...cfg, canchas: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={cfg.idaYVuelta}
-                onChange={(e) => setCfg({ ...cfg, idaYVuelta: e.target.checked })} />
+              <input
+                type="checkbox"
+                checked={cfg.idaYVuelta}
+                onChange={(e) => setCfg({ ...cfg, idaYVuelta: e.target.checked })}
+              />
               Ida y vuelta (duplica las jornadas invirtiendo localía)
             </label>
             <label className="flex items-center gap-2 text-sm text-red-700">
-              <input type="checkbox" checked={cfg.reemplazar}
-                onChange={(e) => setCfg({ ...cfg, reemplazar: e.target.checked })} />
+              <input
+                type="checkbox"
+                checked={cfg.reemplazar}
+                onChange={(e) => setCfg({ ...cfg, reemplazar: e.target.checked })}
+              />
               Reemplazar el calendario existente
             </label>
           </div>
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {error && <p className="aviso-error">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-secundario" onClick={() => setModalGenerar(false)}>
               Cancelar
@@ -236,16 +294,25 @@ export default function Jornadas() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="etiqueta">Número</label>
-              <input className="input" type="number" min={1} value={manual.numero}
-                onChange={(e) => setManual({ ...manual, numero: Number(e.target.value) })} />
+              <input
+                className="input"
+                type="number"
+                min={1}
+                value={manual.numero}
+                onChange={(e) => setManual({ ...manual, numero: Number(e.target.value) })}
+              />
             </div>
             <div>
               <label className="etiqueta">Fecha</label>
-              <input className="input" type="date" value={manual.fecha}
-                onChange={(e) => setManual({ ...manual, fecha: e.target.value })} />
+              <input
+                className="input"
+                type="date"
+                value={manual.fecha}
+                onChange={(e) => setManual({ ...manual, fecha: e.target.value })}
+              />
             </div>
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="aviso-error">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-secundario" onClick={() => setModalManual(false)}>
               Cancelar

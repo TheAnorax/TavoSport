@@ -4,42 +4,49 @@ import { loginSchema, registroSchema } from '@liga/shared';
 import { prisma } from '../prisma.js';
 
 export const rutasAuth: FastifyPluginAsync = async (app) => {
-  app.post('/login', async (req, reply) => {
-    const datos = loginSchema.parse(req.body);
+  app.post(
+    '/login',
+    {
+      // Sin esto, la contraseña de cualquier usuario se puede adivinar por fuerza bruta.
+      config: { rateLimit: { max: 10, timeWindow: '5 minutes' } },
+    },
+    async (req, reply) => {
+      const datos = loginSchema.parse(req.body);
 
-    const liga = await prisma.liga.findUnique({ where: { slug: datos.ligaSlug } });
-    if (!liga) return reply.code(401).send({ error: 'Credenciales inválidas' });
+      const liga = await prisma.liga.findUnique({ where: { slug: datos.ligaSlug } });
+      if (!liga) return reply.code(401).send({ error: 'Credenciales inválidas' });
 
-    const usuario = await prisma.usuario.findUnique({
-      where: { ligaId_email: { ligaId: liga.id, email: datos.email } },
-    });
-    if (!usuario || !usuario.activo) {
-      return reply.code(401).send({ error: 'Credenciales inválidas' });
-    }
+      const usuario = await prisma.usuario.findUnique({
+        where: { ligaId_email: { ligaId: liga.id, email: datos.email } },
+      });
+      if (!usuario || !usuario.activo) {
+        return reply.code(401).send({ error: 'Credenciales inválidas' });
+      }
 
-    const valido = await bcrypt.compare(datos.password, usuario.passwordHash);
-    if (!valido) return reply.code(401).send({ error: 'Credenciales inválidas' });
+      const valido = await bcrypt.compare(datos.password, usuario.passwordHash);
+      if (!valido) return reply.code(401).send({ error: 'Credenciales inválidas' });
 
-    const token = app.jwt.sign({
-      sub: usuario.id,
-      ligaId: usuario.ligaId,
-      rol: usuario.rol,
-      email: usuario.email,
-      nombre: usuario.nombre,
-    });
-
-    return {
-      token,
-      usuario: {
-        id: usuario.id,
+      const token = app.jwt.sign({
+        sub: usuario.id,
+        ligaId: usuario.ligaId,
+        rol: usuario.rol,
         email: usuario.email,
         nombre: usuario.nombre,
-        rol: usuario.rol,
-        ligaId: usuario.ligaId,
-      },
-      liga: { id: liga.id, nombre: liga.nombre, slug: liga.slug, logoUrl: liga.logoUrl },
-    };
-  });
+      });
+
+      return {
+        token,
+        usuario: {
+          id: usuario.id,
+          email: usuario.email,
+          nombre: usuario.nombre,
+          rol: usuario.rol,
+          ligaId: usuario.ligaId,
+        },
+        liga: { id: liga.id, nombre: liga.nombre, slug: liga.slug, logoUrl: liga.logoUrl },
+      };
+    },
+  );
 
   /** Alta de usuarios dentro de la liga del ADMIN autenticado. */
   app.post('/usuarios', { preHandler: app.exigirRol('ADMIN') }, async (req, reply) => {

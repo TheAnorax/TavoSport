@@ -17,9 +17,7 @@ declare module 'fastify' {
     /** Exige sesión válida. */
     autenticar: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Exige sesión válida Y uno de los roles indicados. */
-    exigirRol: (
-      ...roles: Rol[]
-    ) => (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    exigirRol: (...roles: Rol[]) => (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
 

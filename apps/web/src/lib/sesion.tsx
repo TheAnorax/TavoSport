@@ -35,10 +35,11 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       cargando,
       esAdmin: usuario?.rol === 'ADMIN',
       entrar: async (email, password, ligaSlug) => {
-        const r = await api.post<{ token: string; usuario: Usuario; liga: Liga }>(
-          '/auth/login',
-          { email, password, ligaSlug },
-        );
+        const r = await api.post<{ token: string; usuario: Usuario; liga: Liga }>('/auth/login', {
+          email,
+          password,
+          ligaSlug,
+        });
         guardarToken(r.token);
         setUsuario(r.usuario);
       },

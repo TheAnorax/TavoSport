@@ -14,13 +14,42 @@ const REGLAS_DEFAULT = {
 };
 
 const NOMBRES = [
-  'Miguel Ángel Ruiz','Jorge Luis Ramírez','Carlos Alberto Mena','Diego Armando Sosa',
-  'Luis Fernando Ortiz','Juan Pablo Herrera','Óscar Iván Delgado','Ricardo Nájera',
-  'Sergio Alonso Vidal','Emilio Cárdenas','Andrés Felipe Rojas','Hugo Barrera',
-  'Iván Montoya','Raúl Espinoza','Marco Antonio Lira','Fernando Quiroz',
+  'Miguel Ángel Ruiz',
+  'Jorge Luis Ramírez',
+  'Carlos Alberto Mena',
+  'Diego Armando Sosa',
+  'Luis Fernando Ortiz',
+  'Juan Pablo Herrera',
+  'Óscar Iván Delgado',
+  'Ricardo Nájera',
+  'Sergio Alonso Vidal',
+  'Emilio Cárdenas',
+  'Andrés Felipe Rojas',
+  'Hugo Barrera',
+  'Iván Montoya',
+  'Raúl Espinoza',
+  'Marco Antonio Lira',
+  'Fernando Quiroz',
 ];
 
-const POSICIONES: Posicion[] = ['PORTERO','DEFENSA','DEFENSA','DEFENSA','MEDIO','MEDIO','MEDIO','DELANTERO','DELANTERO','DELANTERO','MEDIO','DEFENSA','PORTERO','DELANTERO','MEDIO','DEFENSA'];
+const POSICIONES: Posicion[] = [
+  'PORTERO',
+  'DEFENSA',
+  'DEFENSA',
+  'DEFENSA',
+  'MEDIO',
+  'MEDIO',
+  'MEDIO',
+  'DELANTERO',
+  'DELANTERO',
+  'DELANTERO',
+  'MEDIO',
+  'DEFENSA',
+  'PORTERO',
+  'DELANTERO',
+  'MEDIO',
+  'DEFENSA',
+];
 
 /** Round-robin (algoritmo del círculo). Devuelve jornadas con pares [local, visitante]. */
 function calendarioRoundRobin<T>(equipos: T[]): [T, T][][] {
@@ -61,7 +90,13 @@ async function main() {
   console.log('👤 Creando usuarios...');
   const hash = await bcrypt.hash('Password123', 10);
   const admin = await prisma.usuario.create({
-    data: { ligaId: liga.id, email: 'admin@liga.mx', passwordHash: hash, nombre: 'Administrador', rol: 'ADMIN' },
+    data: {
+      ligaId: liga.id,
+      email: 'admin@liga.mx',
+      passwordHash: hash,
+      nombre: 'Administrador',
+      rol: 'ADMIN',
+    },
   });
   const encargados = await Promise.all(
     [1, 2, 3, 4].map((i) =>
@@ -101,7 +136,14 @@ async function main() {
   });
 
   console.log('⚽ Creando equipos y jugadores...');
-  const nombresEquipos = ['Deportivo Norte','Águilas FC','Real Progreso','Atlético Centro','Halcones Unidos','Club Libertad'];
+  const nombresEquipos = [
+    'Deportivo Norte',
+    'Águilas FC',
+    'Real Progreso',
+    'Atlético Centro',
+    'Halcones Unidos',
+    'Club Libertad',
+  ];
   const equipos = [];
   for (const [i, nombre] of nombresEquipos.entries()) {
     const equipo = await prisma.equipo.create({

@@ -4,12 +4,30 @@ import path from 'node:path';
 import type { FastifyPluginAsync } from 'fastify';
 import { prisma } from '../prisma.js';
 
+/**
+ * SVG queda fuera a propósito: es XML ejecutable y sirve como vector de XSS
+ * almacenado. Solo formatos de mapa de bits.
+ */
 const TIPOS: Record<string, string> = {
   'image/png': '.png',
   'image/jpeg': '.jpg',
   'image/webp': '.webp',
-  'image/svg+xml': '.svg',
 };
+
+/** Números mágicos: el mimetype lo manda el cliente y se puede falsear. */
+const FIRMAS: { ext: string; prueba: (b: Buffer) => boolean }[] = [
+  {
+    ext: '.png',
+    prueba: (b) =>
+      b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+  },
+  { ext: '.jpg', prueba: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
+  {
+    ext: '.webp',
+    prueba: (b) =>
+      b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP',
+  },
+];
 
 const MAX_BYTES = 1_000_000; // 1 MB
 
@@ -35,13 +53,19 @@ export const rutasEscudos: FastifyPluginAsync = async (app) => {
 
       const extension = TIPOS[archivo.mimetype];
       if (!extension) {
-        return reply.code(400).send({ error: 'Formato no permitido. Usa PNG, JPG, WEBP o SVG.' });
+        return reply.code(400).send({ error: 'Formato no permitido. Usa PNG, JPG o WEBP.' });
       }
 
       const bytes = await archivo.toBuffer();
       // El límite también está en el plugin, pero se revisa aquí para dar un mensaje claro.
       if (bytes.byteLength > MAX_BYTES) {
         return reply.code(413).send({ error: 'La imagen supera 1 MB' });
+      }
+
+      // El contenido real debe coincidir con lo que dice ser.
+      const firma = FIRMAS.find((f) => f.ext === extension);
+      if (!firma || !firma.prueba(bytes)) {
+        return reply.code(400).send({ error: 'El archivo no es una imagen válida' });
       }
 
       // El nombre incluye ligaId: aunque alguien adivine una URL, no puede deducir las de otra liga.

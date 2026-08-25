@@ -7,6 +7,19 @@ import {
 } from '@liga/shared';
 import { prisma } from '../prisma.js';
 
+/**
+ * Verifica que el encargado exista, sea de ESTA liga y tenga el rol correcto.
+ * Sin esta comprobación, un admin podría asignar (o adivinar) el id de un usuario
+ * de otra liga y darle acceso a un equipo que no le corresponde.
+ */
+async function encargadoValido(encargadoId: string, ligaId: string) {
+  const u = await prisma.usuario.findFirst({
+    where: { id: encargadoId, ligaId, rol: 'ENCARGADO', activo: true },
+    select: { id: true },
+  });
+  return u !== null;
+}
+
 export const rutasEquipos: FastifyPluginAsync = async (app) => {
   /* ---------- Equipos ---------- */
   app.get<{ Querystring: { temporadaId?: string } }>(
@@ -53,7 +66,8 @@ export const rutasEquipos: FastifyPluginAsync = async (app) => {
     const existe = await prisma.equipo.findFirst({
       where: { temporadaId: datos.temporadaId, nombre: datos.nombre },
     });
-    if (existe) return reply.code(409).send({ error: 'Ya existe un equipo con ese nombre en la temporada' });
+    if (existe)
+      return reply.code(409).send({ error: 'Ya existe un equipo con ese nombre en la temporada' });
 
     const equipo = await prisma.equipo.create({ data: { ...datos, ligaId: req.user.ligaId } });
     return reply.code(201).send(equipo);
@@ -75,6 +89,11 @@ export const rutasEquipos: FastifyPluginAsync = async (app) => {
           return reply.code(403).send({ error: 'Solo puedes editar tu propio equipo' });
         }
         delete (datos as Record<string, unknown>).encargadoId;
+      } else if (
+        datos.encargadoId &&
+        !(await encargadoValido(datos.encargadoId, req.user.ligaId))
+      ) {
+        return reply.code(400).send({ error: 'El encargado indicado no existe en esta liga' });
       }
 
       return prisma.equipo.update({ where: { id: equipo.id }, data: datos });
@@ -121,7 +140,9 @@ export const rutasEquipos: FastifyPluginAsync = async (app) => {
       where: { equipoId: datos.equipoId, numero: datos.numero },
     });
     if (dorsalOcupado) {
-      return reply.code(409).send({ error: `El dorsal ${datos.numero} ya está ocupado en este equipo` });
+      return reply
+        .code(409)
+        .send({ error: `El dorsal ${datos.numero} ya está ocupado en este equipo` });
     }
 
     const jugador = await prisma.jugador.create({ data: { ...datos, ligaId: req.user.ligaId } });
@@ -145,7 +166,8 @@ export const rutasEquipos: FastifyPluginAsync = async (app) => {
         const ocupado = await prisma.jugador.findFirst({
           where: { equipoId: jugador.equipoId, numero: datos.numero },
         });
-        if (ocupado) return reply.code(409).send({ error: `El dorsal ${datos.numero} ya está ocupado` });
+        if (ocupado)
+          return reply.code(409).send({ error: `El dorsal ${datos.numero} ya está ocupado` });
       }
       return prisma.jugador.update({ where: { id: jugador.id }, data: datos });
     },

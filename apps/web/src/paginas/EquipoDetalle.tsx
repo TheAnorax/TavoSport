@@ -5,6 +5,7 @@ import { api, subirArchivo } from '../lib/api';
 import { useSesion } from '../lib/sesion';
 import Modal from '../componentes/Modal';
 import Escudo from '../componentes/Escudo';
+import { IconoEditar, IconoBorrar, IconoMas } from '../componentes/Iconos';
 import type { Equipo, Jugador } from '../lib/tipos';
 
 const vacio = { nombre: '', numero: 1, posicion: '' as string };
@@ -104,7 +105,7 @@ export default function EquipoDetalle() {
                   {subiendo ? 'Subiendo…' : equipo.escudoUrl ? 'Cambiar' : 'Subir escudo'}
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    accept="image/png,image/jpeg,image/webp"
                     className="hidden"
                     onChange={(e) => subirEscudo(e.target.files?.[0])}
                   />
@@ -117,16 +118,16 @@ export default function EquipoDetalle() {
               </div>
             )}
           </div>
-        <div>
-          <h1 className="text-2xl font-bold">{equipo.nombre}</h1>
-          <p className="text-sm text-slate-500">
-            {equipo.temporada?.nombre} · Encargado: {equipo.encargado?.nombre ?? 'sin asignar'}
-          </p>
-        </div>
+          <div>
+            <h1 className="text-2xl font-bold">{equipo.nombre}</h1>
+            <p className="text-sm text-slate-500">
+              {equipo.temporada?.nombre} · Encargado: {equipo.encargado?.nombre ?? 'sin asignar'}
+            </p>
+          </div>
         </div>
         {puedeEditar && (
           <button className="btn-primario" onClick={abrirNuevo}>
-            + Agregar jugador
+            <IconoMas /> Agregar jugador
           </button>
         )}
       </div>
@@ -148,21 +149,31 @@ export default function EquipoDetalle() {
                 <td className="px-4 py-3 font-bold text-cancha-700">{j.numero}</td>
                 <td className="px-4 py-3 font-medium">{j.nombre}</td>
                 <td className="px-4 py-3 text-slate-600">{j.posicion ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-600">{j.estatus}</td>
+                <td className="px-4 py-3">
+                  <span className={j.estatus === 'ACTIVO' ? 'insignia-verde' : 'insignia-gris'}>
+                    {j.estatus}
+                  </span>
+                </td>
                 {puedeEditar && (
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      className="text-sm text-cancha-700 hover:underline"
-                      onClick={() => abrirEditar(j)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="ml-3 text-sm text-red-600 hover:underline"
-                      onClick={() => eliminar(j)}
-                    >
-                      Baja
-                    </button>
+                  <td className="px-4 py-2">
+                    <div className="flex justify-end gap-1.5">
+                      <button
+                        className="btn-icono"
+                        title="Editar jugador"
+                        aria-label="Editar jugador"
+                        onClick={() => abrirEditar(j)}
+                      >
+                        <IconoEditar />
+                      </button>
+                      <button
+                        className="btn-icono-peligro"
+                        title="Dar de baja"
+                        aria-label="Dar de baja"
+                        onClick={() => eliminar(j)}
+                      >
+                        <IconoBorrar />
+                      </button>
+                    </div>
                   </td>
                 )}
               </tr>
@@ -221,7 +232,7 @@ export default function EquipoDetalle() {
               </select>
             </div>
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="aviso-error">{error}</p>}
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-secundario" onClick={() => setModal(false)}>
               Cancelar

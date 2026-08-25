@@ -35,9 +35,15 @@ export default function Posiciones() {
         </div>
         <div>
           <label className="etiqueta">Temporada</label>
-          <select className="input" value={temporadaId} onChange={(e) => setTemporadaId(e.target.value)}>
+          <select
+            className="input"
+            value={temporadaId}
+            onChange={(e) => setTemporadaId(e.target.value)}
+          >
             {temporadas.map((t) => (
-              <option key={t.id} value={t.id}>{t.division?.nombre} — {t.nombre}</option>
+              <option key={t.id} value={t.id}>
+                {t.division?.nombre} — {t.nombre}
+              </option>
             ))}
           </select>
         </div>

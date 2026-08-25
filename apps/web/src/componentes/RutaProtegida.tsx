@@ -3,13 +3,7 @@ import type { ReactNode } from 'react';
 import type { Rol } from '@liga/shared';
 import { useSesion } from '../lib/sesion';
 
-export default function RutaProtegida({
-  children,
-  roles,
-}: {
-  children: ReactNode;
-  roles?: Rol[];
-}) {
+export default function RutaProtegida({ children, roles }: { children: ReactNode; roles?: Rol[] }) {
   const { usuario, cargando } = useSesion();
   const ubicacion = useLocation();
 
@@ -23,7 +17,9 @@ export default function RutaProtegida({
     return (
       <div className="tarjeta mx-auto mt-10 max-w-md text-center">
         <p className="text-lg font-semibold">Sin acceso</p>
-        <p className="mt-1 text-sm text-slate-500">Tu rol ({usuario.rol}) no puede ver esta sección.</p>
+        <p className="mt-1 text-sm text-slate-500">
+          Tu rol ({usuario.rol}) no puede ver esta sección.
+        </p>
       </div>
     );
   }

@@ -1,11 +1,5 @@
 import { z } from 'zod';
-import {
-  ROLES,
-  ESTATUS_EQUIPO,
-  ESTATUS_JUGADOR,
-  ESTADO_PARTIDO,
-  POSICIONES,
-} from './enums.js';
+import { ROLES, ESTATUS_EQUIPO, ESTATUS_JUGADOR, ESTADO_PARTIDO, POSICIONES } from './enums.js';
 import { reglasPuntuacionSchema } from './reglas.js';
 import { configLigaSchema } from './configLiga.js';
 

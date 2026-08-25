@@ -10,7 +10,10 @@ const equipos: EquipoBase[] = [
 ];
 
 const p = (l: string, v: string, gl: number, gv: number): PartidoComputable => ({
-  localId: l, visitanteId: v, golesLocal: gl, golesVisitante: gv,
+  localId: l,
+  visitanteId: v,
+  golesLocal: gl,
+  golesVisitante: gv,
 });
 
 describe('calcularPosiciones', () => {
@@ -88,10 +91,7 @@ describe('calcularPosiciones', () => {
   });
 
   it('ignora partidos de equipos que ya no están en la tabla', () => {
-    const tabla = calcularPosiciones(
-      [{ id: 'a', nombre: 'Alfa' }],
-      [p('a', 'z', 3, 0)],
-    );
+    const tabla = calcularPosiciones([{ id: 'a', nombre: 'Alfa' }], [p('a', 'z', 3, 0)]);
     expect(tabla).toHaveLength(1);
     expect(tabla[0]!.pj).toBe(0);
   });

@@ -29,7 +29,9 @@ export const rutasResultados: FastifyPluginAsync = async (app) => {
         const config = leerConfigLiga(liga?.config);
 
         if (!config.permitirCapturaEncargado) {
-          return reply.code(403).send({ error: 'En esta liga solo el administrador captura resultados' });
+          return reply
+            .code(403)
+            .send({ error: 'En esta liga solo el administrador captura resultados' });
         }
 
         // Solo partidos donde juega su equipo.

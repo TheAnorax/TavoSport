@@ -30,8 +30,14 @@ export default function Inicio() {
   const [d, setD] = useState<Dashboard | null>(null);
 
   useEffect(() => {
-    api.get<Liga>('/liga').then(setLiga).catch(() => {});
-    api.get<Dashboard>('/dashboard').then(setD).catch(() => {});
+    api
+      .get<Liga>('/liga')
+      .then(setLiga)
+      .catch(() => {});
+    api
+      .get<Dashboard>('/dashboard')
+      .then(setD)
+      .catch(() => {});
   }, []);
 
   if (!d) return <p className="text-slate-500">Cargando…</p>;
@@ -54,7 +60,9 @@ export default function Inicio() {
             </p>
             <p className="text-sm text-amber-800">Ya se jugaron y siguen sin marcador capturado.</p>
           </div>
-          <Link to="/jornadas" className="btn-primario">Ir a capturar</Link>
+          <Link to="/jornadas" className="btn-primario">
+            Ir a capturar
+          </Link>
         </div>
       )}
 
@@ -66,7 +74,12 @@ export default function Inicio() {
               Enlace abierto: posiciones y resultados sin cuenta.
             </p>
           </div>
-          <a href={`/publico/${liga.slug}`} target="_blank" rel="noreferrer" className="btn-primario">
+          <a
+            href={`/publico/${liga.slug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-primario"
+          >
             Abrir /publico/{liga.slug}
           </a>
         </div>
@@ -80,7 +93,9 @@ export default function Inicio() {
               {d.proximaJornada ? `Jornada ${d.proximaJornada.numero}` : 'Próxima jornada'}
             </h2>
             {d.proximaJornada && (
-              <span className="text-xs capitalize text-slate-500">{fmtFecha(d.proximaJornada.fecha)}</span>
+              <span className="text-xs capitalize text-slate-500">
+                {fmtFecha(d.proximaJornada.fecha)}
+              </span>
             )}
           </div>
           {d.proximaJornada ? (
@@ -88,11 +103,15 @@ export default function Inicio() {
               <div className="divide-y divide-slate-100">
                 {d.proximaJornada.partidos.map((p) => (
                   <div key={p.id} className="flex items-center gap-2 py-2 text-sm">
-                    <span className="w-14 shrink-0 text-xs text-slate-500">{fmtHora(p.fechaHora)}</span>
+                    <span className="w-14 shrink-0 text-xs text-slate-500">
+                      {fmtHora(p.fechaHora)}
+                    </span>
                     <span className="flex-1 text-right">{p.local.nombre}</span>
                     <span className="shrink-0 text-xs text-slate-400">vs</span>
                     <span className="flex-1">{p.visitante.nombre}</span>
-                    <span className="w-20 shrink-0 text-right text-xs text-slate-400">{p.cancha ?? '—'}</span>
+                    <span className="w-20 shrink-0 text-right text-xs text-slate-400">
+                      {p.cancha ?? '—'}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -112,7 +131,9 @@ export default function Inicio() {
         <div className="tarjeta">
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="font-semibold">Top 5</h2>
-            <Link to="/posiciones" className="text-sm text-cancha-700 hover:underline">Tabla completa →</Link>
+            <Link to="/posiciones" className="text-sm text-cancha-700 hover:underline">
+              Tabla completa →
+            </Link>
           </div>
           {d.top5.length === 0 ? (
             <p className="text-sm text-slate-500">Todavía no hay datos.</p>
@@ -131,7 +152,9 @@ export default function Inicio() {
                     <td className="w-12 py-2 text-center text-xs tabular-nums text-slate-500">
                       {f.dif > 0 ? `+${f.dif}` : f.dif}
                     </td>
-                    <td className="w-10 py-2 text-right font-bold tabular-nums text-cancha-700">{f.pts}</td>
+                    <td className="w-10 py-2 text-right font-bold tabular-nums text-cancha-700">
+                      {f.pts}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -151,11 +174,16 @@ export default function Inicio() {
         ) : (
           <div className="divide-y divide-slate-100">
             {d.capturas.map((c) => (
-              <div key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5 text-sm">
+              <div
+                key={c.id}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5 text-sm"
+              >
                 <span className="w-10 shrink-0 text-xs text-slate-400">J{c.jornada.numero}</span>
                 <span className="flex-1 min-w-[180px]">
                   {c.local.nombre}{' '}
-                  <strong className="tabular-nums">{c.golesLocal}–{c.golesVisitante}</strong>{' '}
+                  <strong className="tabular-nums">
+                    {c.golesLocal}–{c.golesVisitante}
+                  </strong>{' '}
                   {c.visitante.nombre}
                 </span>
                 <span className="text-xs text-slate-500">
